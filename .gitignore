@@ -1,0 +1,20 @@
+## Compilation
+*.o
+a.out
+interstonar
+
+## Vim
+*.sw*
+\#*#
+*~
+:*
+q
+vg
+z
+
+## CMake
+build/
+__pycache__
+
+## Other
+.info
