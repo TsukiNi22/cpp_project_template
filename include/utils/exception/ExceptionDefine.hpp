@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 05/03/2026 by @author Tsukini
+##  @date 09/04/2026 by @author Tsukini
 
 File Name:
 ##  @file ExceptionDefine.hpp
@@ -43,27 +43,18 @@ enum Type: std::uint8_t {
 };
 
 // ------------ Operator ---------- //
-constexpr inline utils::exception::Type operator|(utils::exception::Type ltype, utils::exception::Type rtype)
-{
-    return static_cast<utils::exception::Type>(static_cast<std::uint8_t>(ltype) | static_cast<std::uint8_t>(rtype));
-}
+constexpr utils::exception::Type operator|(utils::exception::Type lhs, utils::exception::Type rhs)
+{return static_cast<utils::exception::Type>(static_cast<std::uint8_t>(lhs) | static_cast<std::uint8_t>(rhs));}
+constexpr utils::exception::Type operator&(utils::exception::Type lhs, utils::exception::Type rhs)
+{return static_cast<utils::exception::Type>(static_cast<std::uint8_t>(lhs) & static_cast<std::uint8_t>(rhs));}
+constexpr utils::exception::Type operator^(utils::exception::Type lhs, utils::exception::Type rhs)
+{return static_cast<utils::exception::Type>(static_cast<std::uint8_t>(lhs) ^ static_cast<std::uint8_t>(rhs));}
+constexpr utils::exception::Type operator~(utils::exception::Type f)
+{return static_cast<utils::exception::Type>(~static_cast<std::uint8_t>(f));}
 
-constexpr inline utils::exception::Type& operator|=(utils::exception::Type& ltype, utils::exception::Type rtype)
-{
-    ltype = ltype | rtype;
-    return ltype;
-}
-
-constexpr inline utils::exception::Type operator&(utils::exception::Type ltype, utils::exception::Type rtype)
-{
-    return static_cast<utils::exception::Type>(static_cast<std::uint8_t>(ltype) & static_cast<std::uint8_t>(rtype));
-}
-
-constexpr inline utils::exception::Type& operator&=(utils::exception::Type& ltype, utils::exception::Type rtype)
-{
-    ltype = ltype & rtype;
-    return ltype;
-}
+inline utils::exception::Type& operator|=(utils::exception::Type& lhs, utils::exception::Type rhs) {return lhs = lhs | rhs;}
+inline utils::exception::Type& operator&=(utils::exception::Type& lhs, utils::exception::Type rhs) {return lhs = lhs & rhs;}
+inline utils::exception::Type& operator^=(utils::exception::Type& lhs, utils::exception::Type rhs) {return lhs = lhs ^ rhs;}
 
 } // namespace end
 #endif /* EXCEPTIONDEFINE_H */

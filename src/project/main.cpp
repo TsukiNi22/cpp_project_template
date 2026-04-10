@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 31/03/2026 by @author Tsukini
+##  @date 10/04/2026 by @author Tsukini
 
 File Name:
 ##  @file main.cpp
@@ -10,7 +10,11 @@ File Description:
 ##  for me, life is all about functions...
 \**************************************************************/
 
-int main(int argc, const char* argv[])
+#define _Exception
+#define _Attribute
+#include "utils/utils.hpp"
+
+cold nodiscard int main(unused int argc, unused const char* argv[])
 {
-    return 0;
+    return OK;
 }
