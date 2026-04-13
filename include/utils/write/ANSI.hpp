@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 06/03/2026 by @author Tsukini
+##  @date 11/04/2026 by @author Tsukini
 
 File Name:
 ##  @file ANSI.hpp
@@ -81,16 +81,16 @@ namespace utils::write { // namespace start
     constexpr inline std::string load_cur() {return std::format("{}[u", static_cast<char>(utils::write::Char::ESC));}
     constexpr inline std::string save_cur() {return std::format("{}[s", static_cast<char>(utils::write::Char::ESC));}
     /* args */
-    constexpr inline std::string up(std::size_t n)                  {return std::format("{}[{}A", static_cast<char>(utils::write::Char::ESC), n);}
-    constexpr inline std::string down(std::size_t n)                {return std::format("{}[{}B", static_cast<char>(utils::write::Char::ESC), n);}
-    constexpr inline std::string right(std::size_t n)               {return std::format("{}[{}C", static_cast<char>(utils::write::Char::ESC), n);}
-    constexpr inline std::string left(std::size_t n)                {return std::format("{}[{}D", static_cast<char>(utils::write::Char::ESC), n);}
-    constexpr inline std::string next_line(std::size_t n)           {return std::format("{}[{}E", static_cast<char>(utils::write::Char::ESC), n);}
-    constexpr inline std::string previous_line(std::size_t n)       {return std::format("{}[{}F", static_cast<char>(utils::write::Char::ESC), n);}
-    constexpr inline std::string column(std::size_t x)              {return std::format("{}[{}G", static_cast<char>(utils::write::Char::ESC), x);}
-    constexpr inline std::string pos(std::size_t x, std::size_t y)  {return std::format("{}[{};{}H", static_cast<char>(utils::write::Char::ESC), x, y);}
-    constexpr inline std::string scroll_up(std::size_t n)           {return std::format("{}[{}S", static_cast<char>(utils::write::Char::ESC), n);}
-    constexpr inline std::string scroll_down(std::size_t n)         {return std::format("{}[{}T", static_cast<char>(utils::write::Char::ESC), n);}
+    constexpr inline std::string up(std::size_t n)                      {return std::format("{}[{}A", static_cast<char>(utils::write::Char::ESC), n);}
+    constexpr inline std::string down(std::size_t n)                    {return std::format("{}[{}B", static_cast<char>(utils::write::Char::ESC), n);}
+    constexpr inline std::string right(std::size_t n)                   {return std::format("{}[{}C", static_cast<char>(utils::write::Char::ESC), n);}
+    constexpr inline std::string left(std::size_t n)                    {return std::format("{}[{}D", static_cast<char>(utils::write::Char::ESC), n);}
+    constexpr inline std::string next_line(std::size_t n)               {return std::format("{}[{}E", static_cast<char>(utils::write::Char::ESC), n);}
+    constexpr inline std::string previous_line(std::size_t n)           {return std::format("{}[{}F", static_cast<char>(utils::write::Char::ESC), n);}
+    constexpr inline std::string column(std::size_t col)                {return std::format("{}[{}G", static_cast<char>(utils::write::Char::ESC), col);}
+    constexpr inline std::string pos(std::size_t row, std::size_t col)  {return std::format("{}[{};{}H", static_cast<char>(utils::write::Char::ESC), row, col);}
+    constexpr inline std::string scroll_up(std::size_t n)               {return std::format("{}[{}S", static_cast<char>(utils::write::Char::ESC), n);}
+    constexpr inline std::string scroll_down(std::size_t n)             {return std::format("{}[{}T", static_cast<char>(utils::write::Char::ESC), n);}
 
     /* ----------- erase ----------- */
     constexpr inline std::string screen_end()           {return std::format("{}[0J", static_cast<char>(utils::write::Char::ESC));}
@@ -112,7 +112,7 @@ namespace utils::write { // namespace start
     constexpr inline std::string load_screen()              {return std::format("{}[?1049l", static_cast<char>(utils::write::Char::ESC));}
     
     /* --------- reports ---------- */
-    constexpr inline std::string get_pos()                      {return std::format("{}[6n", static_cast<char>(utils::write::Char::ESC));} // Reports cursor position as "ESC[y;xR"
+    constexpr inline std::string get_pos()                      {return std::format("{}[6n", static_cast<char>(utils::write::Char::ESC));} // Reports cursor position as "ESC[row;colR"
     constexpr inline std::string mouse_tracking_enable()        {return std::format("{}[?1000h", static_cast<char>(utils::write::Char::ESC));}
     constexpr inline std::string mouse_tracking_disable()       {return std::format("{}[?1000l", static_cast<char>(utils::write::Char::ESC));}
     constexpr inline std::string mouse_move_tracking_enable()   {return std::format("{}[?1002h", static_cast<char>(utils::write::Char::ESC));}
@@ -157,7 +157,8 @@ struct AdvancedMouseEvent {
     bool pressed = false;
 };
 
-// Input -> Mouse Event
+/* reports */
+std::pair<int, int> readCursorPosition();
 utils::write::MouseEvent readMouseEvent();
 utils::write::AdvancedMouseEvent readAdvancedMouseEvent();
 

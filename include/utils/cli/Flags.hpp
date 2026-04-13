@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 10/04/2026 by @author Tsukini
+##  @date 12/04/2026 by @author Tsukini
 
 File Name:
 ##  @file Flags.hpp
@@ -42,7 +42,7 @@ enum Flag {
     ARROW           = 1 << 8, // Activate left, right
     HISTORY         = 1 << 9, // Activate history, up and down arrow
     HINT            = 1 << 10, // Display hint when a command fail
-    AUTO_COMPLETION = 1 << 11, // Active auto completion with `\t`
+    AUTO_COMPLETION = 1 << 11, // Active auto completion with `\t` (only work on the first command for now)
 };
 
 /*

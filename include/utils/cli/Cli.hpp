@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 10/04/2026 by @author Tsukini
+##  @date 12/04/2026 by @author Tsukini
 
 File Name:
 ##  @file Cli.hpp
@@ -84,10 +84,6 @@ class Cli {
         std::string getInput();
         utils::cli::ParsedData parse(const std::string& input);
         void exec(const utils::cli::ParsedData& parsedInput);
-
-        /* interuption */
-        static Cli* _instance;
-        static void interupt(int signo);
 
     public:
         /* middlewares */
