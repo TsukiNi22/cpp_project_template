@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  10/04/2026 by Tsukini
+##  20/04/2026 by Tsukini
 
 File Name:
 ##  const.py
@@ -50,7 +50,7 @@ class File:
         Different files path
     """
     REQUIREMENTS = "cmake/scripts/requirements.txt"
-    CONFIG_EXCEPTION = "cmake/config/exception/"
+    CONFIG_EXCEPTION = "cmake/config/exceptions/"
     EXCEPTION_DEFINE_HEADER = "include/utils/exception/ExceptionDefine.hpp"
     GENERATED_EXCEPTION_HEADER = "include/utils/exception/generated_exception_header.hpp"
 

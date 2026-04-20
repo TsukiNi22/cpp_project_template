@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 08/04/2026 by @author Tsukini
+##  @date 20/04/2026 by @author Tsukini
 
 File Name:
 ##  @file Vector3.hpp
@@ -28,6 +28,7 @@ File Description:
     #include "../exception/ExceptionDefine.hpp"         // utils::exception::Code
     #include "../exception/basic/ErrorException.hpp"    // utils::exception::ErrorException
     #include "IVector.hpp"                              // utils::vector::IVector
+    #include <algorithm>                                // std::clamp
     #include <ostream>                                  // std::ostream
     #include <cstddef>                                  // std::size_t
     #include <cmath>                                    // std::sqrt

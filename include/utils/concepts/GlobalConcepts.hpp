@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 08/04/2026 by @author Tsukini
+##  @date 20/04/2026 by @author Tsukini
 
 File Name:
 ##  @file GlobalConcepts.hpp
@@ -42,6 +42,11 @@ concept Swappable = requires(T a, T b) {
 
 template<typename T>
 concept Streamable = requires(std::ostream& os, T a) {os << a;};
+
+template <class T, class U>
+concept convertible_to = std::is_convertible_v<T, U> && requires {
+    static_cast<U>(std::declval<T>());
+};
 
 } // namespace end
 #endif /* GLOBALCONCEPTS_H */

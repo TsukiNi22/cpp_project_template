@@ -5,11 +5,6 @@
             "message": "Error during the setup of an exception",
             "info": "Restriction trigerred on a code & type combination",
             "restrictions": ["Fatal", "Error"]
-        },
-        {
-            "code": "MouseEvent",
-            "message": "Error during the read of the mouse event",
-            "restrictions": ["Fatal", "Error"]
         }
     ]
 }

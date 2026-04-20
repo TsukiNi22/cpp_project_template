@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 08/04/2026 by @author Tsukini
+##  @date 20/04/2026 by @author Tsukini
 
 File Name:
 ##  @file OperationConcepts.hpp
@@ -19,6 +19,12 @@ File Description:
 
 #ifndef OPERATIONCONCEPTS_H
     #define OPERATIONCONCEPTS_H
+
+    //----------------------------------------------------------------//
+    /* INCLUDE */
+
+    /* type */
+    #include <iostream> // std::convertible_to ????
 
 namespace utils::concepts { // namespace start
 //----------------------------------------------------------------//

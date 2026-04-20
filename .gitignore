@@ -1,7 +1,8 @@
 ## Compilation
 *.o
+*.a
+*.so
 a.out
-interstonar
 
 ## Vim
 *.sw*
@@ -15,6 +16,7 @@ z
 ## CMake
 build/
 __pycache__
+/libs
 
 ## Other
-.info
+#.info
