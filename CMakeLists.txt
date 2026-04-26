@@ -53,7 +53,7 @@ add_dependencies(${TARGET} generated_exception_header)
 # =========================
 target_compile_options(${TARGET} PRIVATE
     $<$<CONFIG:Debug>:-g -ggdb3>
-    $<$<CONFIG:Release>:-O1>
+    $<$<CONFIG:Optimized>:-O3 -ffast-math -march=native -funroll-loops -pipe -DNDEBUG>
 )
 
 # =========================

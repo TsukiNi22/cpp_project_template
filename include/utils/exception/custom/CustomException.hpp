@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 04/03/2026 by @author Tsukini
+##  @date 26/04/2026 by @author Tsukini
 
 File Name:
 ##  @file CustomException.hpp
@@ -25,17 +25,17 @@ namespace utils::exception { // namespace start
 //----------------------------------------------------------------//
 /* CLASS */
 
-class CustomException: virtual public utils::exception::AException {
+class CustomException: public utils::exception::AException {
     public:
         // ------------ Operator ---------- //
-        CustomException& operator=(const CustomException& object) = delete;
-        CustomException& operator=(CustomException&& object) = delete;
+        CustomException& operator=(const CustomException& other) = delete;
+        CustomException& operator=(CustomException&& other) = delete;
 
         // ---------- Constructor --------- //
         cold CustomException(utils::exception::Type type = utils::exception::Type::None, std::string info = "[None]", std::source_location loc = std::source_location::current()) : AException(loc, type, utils::exception::Code::Undefined, info) {};
         cold CustomException(utils::exception::Type type = utils::exception::Type::None, utils::exception::Code code = utils::exception::Code::Undefined, std::string info = "[None]", std::source_location loc = std::source_location::current()) : AException(loc, type, code, info) {};
-        CustomException(const CustomException& object) = delete;
-        CustomException(CustomException&& object) = delete;
+        CustomException(const CustomException& other) = delete;
+        CustomException(CustomException&& other) = delete;
 
         // ----------- Destructor --------- //
         ~CustomException() = default;

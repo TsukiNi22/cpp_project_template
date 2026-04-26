@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 03/03/2026 by @author Tsukini
+##  @date 26/04/2026 by @author Tsukini
 
 File Name:
 ##  @file WarningException.hpp
@@ -25,16 +25,16 @@ namespace utils::exception { // namespace start
 //----------------------------------------------------------------//
 /* CLASS */
 
-class WarningException: virtual public utils::exception::AException {
+class WarningException: public utils::exception::AException {
     public:
         // ------------ Operator ---------- //
-        WarningException& operator=(const WarningException& object) = delete;
-        WarningException& operator=(WarningException&& object) = delete;
+        WarningException& operator=(const WarningException& other) = delete;
+        WarningException& operator=(WarningException&& other) = delete;
 
         // ---------- Constructor --------- //
         cold WarningException(utils::exception::Code code = utils::exception::Code::Undefined, std::source_location loc = std::source_location::current()) : AException(loc, utils::exception::Type::Warning, code) {};
-        WarningException(const WarningException& object) = delete;
-        WarningException(WarningException&& object) = delete;
+        WarningException(const WarningException& other) = delete;
+        WarningException(WarningException&& other) = delete;
 
         // ----------- Destructor --------- //
         ~WarningException() = default;
