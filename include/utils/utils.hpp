@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 26/04/2026 by @author Tsukini
+##  @date 27/04/2026 by @author Tsukini
 
 File Name:
 ##  @file utils.hpp
@@ -12,15 +12,18 @@ File Description:
 //----------------------------------------------------------------//
 /* DEFINE */
 
-/* Desactivate all automatic warning */
+/* Desactivate all automatic warning & outdated message */
 #ifdef _NoWarning
-    #define NO_SHARED_OBJECT_WARNING // shared other
+    //#define NO_SHARED_OBJECT_WARNING // shared other
 #endif
 
 // Disabling of the auto warning for shared other
-#ifdef NO_SHARED_OBJECT_WARNING
-    #warning "Automatic shared other warnings from 'utils/utils.hpp' are disable"
+/*
+#if defined(NO_SHARED_OBJECT_WARNING) && !defined(_WARNING_NO_SHARED_OBJECT_WARNING)
+    #define _WARNING_NO_SHARED_OBJECT_WARNING
+    #warning "Automatic shared object warnings from 'utils/utils.hpp' are disable"
 #endif
+*/
 
 /* Activate all include */
 #ifdef _Utils
@@ -88,6 +91,8 @@ File Description:
     #include "vector/IVector.hpp"   // utils::vector::IVector<T>
     #include "vector/Vector2.hpp"   // utils::vector::Vector2<T>
     #include "vector/Vector3.hpp"   // utils::vector::Vector3<T>
+    #include "vector/OVector2.hpp"  // utils::vector::OVector2<T>
+    #include "vector/OVector3.hpp"  // utils::vector::OVector3<T>
 #endif
 
 /* Concepts */

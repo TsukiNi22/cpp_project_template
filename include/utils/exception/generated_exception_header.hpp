@@ -33,6 +33,9 @@ enum class Code: std::size_t {
     ExceptionCodeRestriction,
     Exit,
     ANSIMouseEvent,
+    IdOverflow,
+    UnknowId,
+    SharedObject,
     CliInternal,
     CliHook,
     CliMiddleware,
@@ -49,6 +52,9 @@ constexpr inline const char *Message[] = {
     /* ExceptionCodeRestriction */ "Error during the setup of an exception",
     /* Exit */ "Exit",
     /* ANSIMouseEvent */ "Error during the read of the mouse event",
+    /* IdOverflow */ "Can't distribute an id, uint32_t limits are reach",
+    /* UnknowId */ "Try to edit an unknow id",
+    /* SharedObject */ "An object created with dynamic code that was free is still alive",
     /* CliInternal */ "Internal error from the cli",
     /* CliHook */ "Error during a hook call",
     /* CliMiddleware */ "Error during a middleware call",
@@ -64,6 +70,9 @@ constexpr inline const char *Info[] = {
     /* ExceptionCodeRestriction */ "Restriction trigerred on a code & type combination",
     /* Exit */ "Exit",
     /* ANSIMouseEvent */ nullptr,
+    /* IdOverflow */ nullptr,
+    /* UnknowId */ nullptr,
+    /* SharedObject */ nullptr,
     /* CliInternal */ nullptr,
     /* CliHook */ nullptr,
     /* CliMiddleware */ nullptr,
@@ -84,6 +93,9 @@ constexpr inline const std::uint8_t Restriction[] = {
     /* ExceptionCodeRestriction */ 0b0110, // allow: Fatal, Error
     /* Exit */ 0b0001, // allow: None
     /* ANSIMouseEvent */ 0b0110, // allow: Fatal, Error
+    /* IdOverflow */ 0b0110, // allow: Fatal, Error
+    /* UnknowId */ 0b0110, // allow: Fatal, Error
+    /* SharedObject */ 0b1110, // allow: Fatal, Error, Warning
     /* CliInternal */ 0b0110, // allow: Fatal, Error
     /* CliHook */ 0b1110, // allow: Fatal, Error, Warning
     /* CliMiddleware */ 0b1110, // allow: Fatal, Error, Warning
