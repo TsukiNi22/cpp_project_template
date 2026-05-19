@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 07/03/2026 by @author Tsukini
+##  @date 18/05/2026 by @author Tsukini
 
 File Name:
 ##  @file Format.hpp

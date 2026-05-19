@@ -11,44 +11,37 @@ Edition:
 ##  @date 18/05/2026 by @author Tsukini
 
 File Name:
-##  @file IVector.hpp
+##  @file Middlewares.hpp
 
 File Description:
-##  Interface for the cutomized vector
+##  Declaration of the Middleware type for void & non void function
 \**************************************************************/
 
-#ifndef IVECTOR_H
-    #define IVECTOR_H
+#ifndef MIDDLEWARESTYPE_H
+    #define MIDDLEWARESTYPE_H
 
     //----------------------------------------------------------------//
     /* INCLUDE */
 
     /* type */
-    #include "../warning/Observer.hpp"  // utils::warning::Observer
-    #include <cstddef>                  // std::size_t
+    #include <functional>   // std::function
 
-namespace utils::vector { // namespace start
+namespace utils::middleware { // namespace
 //----------------------------------------------------------------//
 /* CLASS */
 
 template<typename T>
-class IVector: private utils::warning::Observer {
-    public:
-        // ---------- Pre-Function -------- //
-        virtual T get(std::size_t index) const = 0;
-
-        // ------------ Operator ---------- //
-        IVector& operator=(const IVector& other) = default;
-        IVector& operator=(IVector&& other) = default;
-
-        // ---------- Constructor --------- //
-        IVector() = default;
-        IVector(const IVector& other) = default;
-        IVector(IVector&& other) = default;
-
-        // ----------- Destructor --------- //
-        virtual ~IVector() = default;
+struct MiddlewareType {
+    using type = std::function<void(T)>;
 };
 
+template<>
+struct MiddlewareType<void> {
+    using type = std::function<void()>;
+};
+
+template<typename T>
+using Middleware = typename MiddlewareType<T>::type;
+
 } // namespace end
-#endif /* IVECTOR_H */
+#endif /* MIDDLEWARESTYPE_H */

@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 27/04/2026 by @author Tsukini
+##  @date 19/05/2026 by @author Tsukini
 
 File Name:
 ##  @file utils.hpp
@@ -14,16 +14,15 @@ File Description:
 
 /* Desactivate all automatic warning & outdated message */
 #ifdef _NoWarning
-    //#define NO_SHARED_OBJECT_WARNING // shared other
+    #define NO_OUTDATED_WARNING // outdated(...)
+    //#define NO_SHARED_OBJECT_WARNING // shared object
+    //#warning "All warnings from 'utils/utils.hpp' are disable"
 #endif
 
 // Disabling of the auto warning for shared other
-/*
-#if defined(NO_SHARED_OBJECT_WARNING) && !defined(_WARNING_NO_SHARED_OBJECT_WARNING)
-    #define _WARNING_NO_SHARED_OBJECT_WARNING
+#if defined(NO_SHARED_OBJECT_WARNING) && !defined(_NoWarning)
     #warning "Automatic shared object warnings from 'utils/utils.hpp' are disable"
 #endif
-*/
 
 /* Activate all include */
 #ifdef _Utils
@@ -43,6 +42,7 @@ File Description:
 #ifdef _Tools
     #define _Vector
     #define _Concepts
+    #define _Middleware
     #define _Algorithms
 #endif
 
@@ -76,7 +76,6 @@ File Description:
     // -> Handling of a customizable command line interface
     #include "cli/Cli.hpp"          // utils::cli::Cli, utils::cli::ParsedData
     #include "cli/Flags.hpp"        // utils::cli::Flag, utils::cli::Flags
-    #include "cli/Middlewares.hpp"  // utils::cli::Middlewares
 #endif
 
 /* Macro */
@@ -100,6 +99,19 @@ File Description:
     // -> Definition of different concepts
     #include "concepts/GlobalConcepts.hpp"      // Global concepts
     #include "concepts/OperationConcepts.hpp"   // Operation concepts
+#endif
+
+/* Middleware */
+#ifdef _Middleware
+    // -> Middlewares handling
+    #include "middleware/Middlewares.hpp"   // utils::middleware::Middleware<...>, utils::middleware::Middlewares<...>
+    /*
+    #include "middleware/MiddlewaresType.hpp"       // utils::middleware::Middleware<...>
+    #include "middleware/Middlewares_t-t.hpp"       // utils::middleware::Middlewares<T, U>
+    #include "middleware/Middlewares_t-void.hpp"    // utils::middleware::Middlewares<T, void>
+    #include "middleware/Middlewares_void-t.hpp"    // utils::middleware::Middlewares<void, T>
+    #include "middleware/Middlewares_void-void.hpp" // utils::middleware::Middlewares<void, void>
+    */
 #endif
 
 /* Algorithms */

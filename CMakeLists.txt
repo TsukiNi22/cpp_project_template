@@ -12,8 +12,13 @@ set(CMAKE_CXX_COMPILER clang++)
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}) # TARGET destination
 set(CMAKE_POSITION_INDEPENDENT_CODE ON) # Moderne compilation -fPIE
 add_definitions(-DFORCED_CXX_STANDARD=14) # Used for the attribute definition
-add_definitions(-D_NoWarning) # Remove warnings from utils
-find_package(Python3 REQUIRED) # Try to find python for the dependencies
+add_definitions(-D_NoWarning) # Remove warnings from utils (usless for hard import)
+
+# =========================
+# Requirement
+# =========================
+find_package(PkgConfig REQUIRED)
+find_package(Python3 REQUIRED) # Used for the special dependencie
 
 # =========================
 # Warnings
@@ -38,15 +43,21 @@ set(SRC
 add_executable(${TARGET} ${SRC})
 
 # =========================
+# Special Targets
+# =========================
+add_custom_target(generated_exception_header ALL
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/cmake/scripts/generate_exception_header.py
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating exception header"
+    VERBATIM
+)
+
+# =========================
 # Dependencies
 # =========================
 target_include_directories(${TARGET} PRIVATE include)
 target_link_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/cmake/libs/)
 target_link_libraries(${TARGET} PRIVATE utils)
-add_custom_target(generated_exception_header ALL
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/cmake/scripts/generate_exception_header.py
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
 add_dependencies(${TARGET} generated_exception_header)
 
 # =========================
