@@ -1,0 +1,55 @@
+name: Build checking workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  EXECUTABLES: "project"
+
+jobs:
+  buil_executables:
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: bash
+
+    container:
+      image: ubuntu:24.04
+      #image: epitechcontent/epitest-docker:latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Compile program
+        run: |
+          set -e
+          make re
+        timeout-minutes: 2
+
+      - name: Check executables
+        run: |
+          set -euo pipefail
+
+          for executable in $(echo $EXECUTABLES | tr ',' ' ' | xargs); do
+            if [ ! -f "./$executable" ]; then
+              echo "::error title=Missing executable, file=$executable::Executable '$executable' not found"
+              exit 1
+            fi
+
+            if [ ! -x "$executable" ]; then
+              echo "::error title=Permission error,file=$executable::Executable '$executable' has no execution permission"
+              exit 1
+            fi
+
+            echo "✓ Executable '$executable' ok"
+          done
