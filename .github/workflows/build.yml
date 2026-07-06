@@ -15,7 +15,24 @@ env:
   EXECUTABLES: "project"
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      dockerfile: ${{ steps.filter.outputs.dockerfile }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            dockerfile:
+              - '.github/docker/Dockerfile'
+
   buil_executables:
+    needs: changes
+    if: needs.changes.outputs.dockerfile == 'false'
+
     #runs-on: self-hosted
     runs-on: ubuntu-latest
     defaults:
