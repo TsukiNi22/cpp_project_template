@@ -1,4 +1,4 @@
-name: Build checking workflow
+name: Build executables
 
 on:
   workflow_run:
