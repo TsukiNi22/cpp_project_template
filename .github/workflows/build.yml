@@ -1,8 +1,13 @@
 name: Build checking workflow
 
 on:
+  workflow_run:
+    workflows: ["Build CI image"]
+    types: [completed]
   push:
     branches: [main]
+    paths-ignore:
+      - '.github/docker/Dockerfile'
   pull_request:
     branches: [main]
 
