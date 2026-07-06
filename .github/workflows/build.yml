@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  EXECUTABLES: "project"
+  EXECUTABLES: "template"
 
 jobs:
   build-executables:
