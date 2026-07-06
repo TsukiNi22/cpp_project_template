@@ -10,47 +10,7 @@ env:
   EXECUTABLES: "project"
 
 jobs:
-  docker-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      dockerfile: ${{ steps.filter.outputs.dockerfile }}
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            dockerfile:
-              - '.github/docker/ci.Dockerfile'
-
-  build-image:
-    needs: docker-changes
-    if: needs.docker-changes.outputs.dockerfile == 'true'
-
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GIT_TOKEN }}
-      - run: |
-          REPOSITORY_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker build -t ghcr.io/$REPOSITORY_OWNER_LOWERCASE/ci:latest -f .github/docker/ci.Dockerfile .github/docker/
-          docker push ghcr.io/$REPOSITORY_OWNER_LOWERCASE/ci:latest
-
   build-executables:
-    needs: [docker-changes, build-image]
-    if: |
-      always() &&
-      needs.docker-changes.result == 'success' &&
-      (needs.build-image.result == 'success' || needs.build-image.result == 'skipped')
-
     #runs-on: self-hosted
     runs-on: ubuntu-latest
     defaults:
