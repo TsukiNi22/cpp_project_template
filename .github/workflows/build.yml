@@ -17,6 +17,8 @@ env:
 jobs:
   docker-changes:
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
     outputs:
       dockerfile: ${{ steps.filter.outputs.dockerfile }}
 
