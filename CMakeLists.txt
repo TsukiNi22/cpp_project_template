@@ -73,7 +73,10 @@ add_custom_target(generated_exception_header
 # =========================
 target_include_directories(${TARGET} PRIVATE include)
 target_link_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/cmake/libs/)
-target_link_libraries(${TARGET} PRIVATE utils)
+target_link_libraries(${TARGET} PRIVATE
+    $<$<CONFIG:Debug>:utils_debug>
+    $<$<NOT:$<CONFIG:Debug>>:utils>
+)
 add_dependencies(${TARGET} generated_exception_header)
 
 # =========================
