@@ -4,6 +4,7 @@
 !cmake/libs/*.a
 *.so
 a.out
+generated_exception_header.hpp
 
 # Executables
 project
