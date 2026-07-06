@@ -7,7 +7,7 @@ a.out
 generated_exception_header.hpp
 
 # Executables
-project
+template
 
 ## Vim
 *.sw*

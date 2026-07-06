@@ -25,19 +25,19 @@ rm -rf "$TMP_DIR/.git"
 mkdir -p "$TARGET_DIR"
 cp -r "$TMP_DIR"/. "$TARGET_DIR"/
 
-##### Rename files/directories containing 'project' #####
-echo "Renaming files and directories: 'project' -> '${PROJECT_NAME}'..."
-find "$TARGET_DIR" -depth -iname "*project*" -not -path "*/.git/*" | while read -r path; do
-    new_path="$(dirname "$path")/$(basename "$path" | sed "s/project/${PROJECT_NAME}/g")"
+##### Rename files/directories containing 'template' #####
+echo "Renaming files and directories: 'template' -> '${PROJECT_NAME}'..."
+find "$TARGET_DIR" -depth -iname "*template*" -not -path "*/.git/*" | while read -r path; do
+    new_path="$(dirname "$path")/$(basename "$path" | sed "s/template/${PROJECT_NAME}/g")"
     if [ "$path" != "$new_path" ]; then
         mv "$path" "$new_path"
     fi
 done
 
-##### Replace 'project' inside file contents (CMakeLists.txt, headers, sources) #####
-echo "Replacing 'project' references inside files..."
-grep -rlZE --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" '\bproject\b' "$TARGET_DIR" 2>/dev/null \
-    | xargs -0 -r sed -i "s/\bproject\b/${PROJECT_NAME}/g"
+##### Replace 'template' inside file contents (CMakeLists.txt, .gitignore, headers, sources) #####
+echo "Replacing 'template' references inside files..."
+grep -rlZE --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" --include=".gitignore" '\btemplate\b' "$TARGET_DIR" 2>/dev/null \
+    | xargs -0 -r sed -i "s/\btemplate\b/${PROJECT_NAME}/g"
 
 ##### Commit and push #####
 cd "$TARGET_DIR"

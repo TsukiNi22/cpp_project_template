@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-set(TARGET project)
+set(TARGET template)
 project(${TARGET} LANGUAGES CXX)
 
 # =========================
@@ -42,7 +42,7 @@ add_compile_options(
 # =========================
 set(SRC
     # Main
-    src/project/main.cpp
+    src/template/main.cpp
 )
 add_executable(${TARGET} ${SRC})
 
