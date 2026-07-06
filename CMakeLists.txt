@@ -19,6 +19,10 @@ add_definitions(-D_NoWarning) # Remove warnings from utils (usless for hard impo
 # =========================
 find_package(PkgConfig REQUIRED)
 find_package(Python3 REQUIRED) # Used for the special dependencie
+find_program(CCACHE_PROGRAM ccache) # Used for cache during compilation
+if (CCACHE_PROGRAM)
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+endif()
 
 # =========================
 # Warnings

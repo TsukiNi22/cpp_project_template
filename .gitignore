@@ -5,6 +5,9 @@
 *.so
 a.out
 
+# Executables
+project
+
 ## Vim
 *.sw*
 \#*#
