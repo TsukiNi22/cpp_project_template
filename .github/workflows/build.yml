@@ -11,7 +11,7 @@ env:
 
 jobs:
   build-executables:
-    runs-on: ${{ variables.RUNNER }}
+    runs-on: ${{ vars.RUNNER }}
     defaults:
       run:
         shell: bash
