@@ -15,7 +15,7 @@ env:
   EXECUTABLES: "project"
 
 jobs:
-  changes:
+  docker-changes:
     runs-on: ubuntu-latest
     outputs:
       dockerfile: ${{ steps.filter.outputs.dockerfile }}
@@ -28,10 +28,13 @@ jobs:
           filters: |
             dockerfile:
               - '.github/docker/Dockerfile'
+      - name: Warn if build was skipped
+        if: steps.filter.outputs.dockerfile == 'true'
+        run: echo "::warning title=Build skipped::Dockerfile changed, build-executables was skipped for this run"
 
-  buil_executables:
-    needs: changes
-    if: needs.changes.outputs.dockerfile == 'false'
+  build-executables:
+    needs: docker-changes
+    if: needs.docker-changes.outputs.dockerfile == 'false'
 
     #runs-on: self-hosted
     runs-on: ubuntu-latest
