@@ -1,13 +1,8 @@
-name: Build executables
+name: CI - Executables
 
 on:
-  workflow_run:
-    workflows: ["Build CI image"]
-    types: [completed]
   push:
     branches: [main]
-    paths-ignore:
-      - '.github/docker/ci.Dockerfile'
   pull_request:
     branches: [main]
 
@@ -16,10 +11,7 @@ env:
 
 jobs:
   docker-changes:
-    if: github.event_name != 'workflow_run'
     runs-on: ubuntu-latest
-    permissions:
-      checks: write
     outputs:
       dockerfile: ${{ steps.filter.outputs.dockerfile }}
 
@@ -31,27 +23,33 @@ jobs:
           filters: |
             dockerfile:
               - '.github/docker/ci.Dockerfile'
-      - name: Report skipped as neutral check
-        if: steps.filter.outputs.dockerfile == 'true'
-        uses: actions/github-script@v7
+
+  build-image:
+    needs: docker-changes
+    if: needs.docker-changes.outputs.dockerfile == 'true'
+
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
         with:
-          script: |
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'build-executables',
-              head_sha: context.sha,
-              status: 'completed',
-              conclusion: 'neutral',
-              output: {
-                title: 'Build skipped',
-                summary: 'Skipped because .github/docker/ci.Dockerfile was modified in this push.'
-              }
-            });
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GIT_TOKEN }}
+      - run: |
+          REPOSITORY_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t ghcr.io/$REPOSITORY_OWNER_LOWERCASE/ci:latest -f .github/docker/ci.Dockerfile .github/docker/
+          docker push ghcr.io/$REPOSITORY_OWNER_LOWERCASE/ci:latest
 
   build-executables:
-    needs: docker-changes
-    if: needs.docker-changes.outputs.dockerfile == 'false'
+    needs: [docker-changes, build-image]
+    if: |
+      always() &&
+      needs.docker-changes.result == 'success' &&
+      (needs.build-image.result == 'success' || needs.build-image.result == 'skipped')
 
     #runs-on: self-hosted
     runs-on: ubuntu-latest
@@ -77,17 +75,14 @@ jobs:
       - name: Check executables
         run: |
           set -euo pipefail
-
           for executable in $(echo $EXECUTABLES | tr ',' ' ' | xargs); do
             if [ ! -f "./$executable" ]; then
               echo "::error title=Missing executable, file=$executable::Executable '$executable' not found"
               exit 1
             fi
-
             if [ ! -x "$executable" ]; then
               echo "::error title=Permission error,file=$executable::Executable '$executable' has no execution permission"
               exit 1
             fi
-
             echo "✓ Executable '$executable' ok"
           done
