@@ -3,7 +3,7 @@ name: Build CI image
 on:
   push:
     paths:
-      - 'docker/Dockerfile'
+      - '.github/docker/Dockerfile'
     branches: [main]
 
 jobs:

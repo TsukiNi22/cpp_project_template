@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     git \
     pkg-config \
+    python3 \
     && rm -rf /var/lib/apt/lists/*
 
 ENV CC=clang
