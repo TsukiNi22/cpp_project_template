@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 19/05/2026 by @author Tsukini
+##  @date 04/06/2026 by @author Tsukini
 
 File Name:
 ##  @file utils.hpp
@@ -40,9 +40,11 @@ File Description:
 
 /* Activate all tool include */
 #ifdef _Tools
+    #define _BLT // Bidirectional Lookup Table
     #define _Vector
     #define _Concepts
     #define _Middleware
+    #define _Arguments
     #define _Algorithms
 #endif
 
@@ -84,6 +86,16 @@ File Description:
     #include "attribute/Attribute.hpp"  // different define/macro for optimisation & other
 #endif
 
+/* Bidirectional Lookup Table */
+#ifdef _BLT
+    // -> Bidirectional lookup table (const)
+    #include "blt/BidirectionalLookupTable.hpp" // utils::blt::BidirectionalLookupTable<L, R, ...>, utils::blt::BidirectionalLookupTable<T, ...>
+    /*
+    #include "blt/BidirectionalLookupTable_t-t.hpp" // utils::blt::BidirectionalLookupTable<L, R, ...>
+    #include "blt/BidirectionalLookupTable_t.hpp"   // utils::blt::BidirectionalLookupTable<T, ...>
+    */
+#endif
+
 /* VectorX */
 #ifdef _Vector
     // -> Customized vector2 & vector3 for respectively 2 & 3 value of undefined type
@@ -114,6 +126,14 @@ File Description:
     */
 #endif
 
+/* Arguments */
+#ifdef _Arguments
+    // -> Definition of different thing to handle arguments
+    // -> ArgParser: basic check & parsing of arguments
+    #include "arguments/ArgParser.hpp"      // utils::arguments::ArgParser
+    #include "arguments/ArgParserType.hpp"  // utils::arguments::* (Type)
+#endif
+
 /* Algorithms */
 #ifdef _Algorithms
     // -> Definition of different algorithms
@@ -121,4 +141,6 @@ File Description:
     #include "algorithms/c2dmp-hsm/c2dmp-hsm.hpp"               // utils::algorithms::c2dmp::c2dmp
     #include "algorithms/c2dmp-hsm/algorithm/optimized.hpp"     // utils::algorithms::c2dmp::c2dmp_optimized
     #include "algorithms/c2dmp-hsm/algorithm/simplified.hpp"    // utils::algorithms::c2dmp::c2dmp_simplified
+    #include "algorithms/c2dmp-hsm/algorithm/foptimized.hpp"    // utils::algorithms::c2dmp::c2dmp_foptimized
+    #include "algorithms/c2dmp-hsm/algorithm/fsimplified.hpp"   // utils::algorithms::c2dmp::c2dmp_fsimplified
 #endif

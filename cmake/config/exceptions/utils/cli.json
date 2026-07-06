@@ -1,6 +1,11 @@
 {
     "errors": [
         {
+            "code": "CliTTY",
+            "message": "Can't start cli, not in a tty (enable the flag TTY to force usage)",
+            "restrictions": ["Fatal", "Error"]
+        },
+        {
             "code": "CliInternal",
             "message": "Internal error from the cli",
             "restrictions": ["Fatal", "Error"]
@@ -27,6 +32,11 @@
         {
             "code": "CliAlreadyRunning",
             "message": "Can't start a cli that is already running",
+            "restrictions": ["Fatal", "Error", "Warning"]
+        },
+        {
+            "code": "CliKilled",
+            "message": "Can't start or restart a cli that was killed",
             "restrictions": ["Fatal", "Error", "Warning"]
         }
     ]

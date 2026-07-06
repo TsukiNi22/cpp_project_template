@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 19/05/2026 by @author Tsukini
+##  @date 06/07/2026 by @author Tsukini
 
 File Name:
 ##  @file AException.hpp
@@ -20,6 +20,7 @@ File Description:
     #include "ExceptionDefine.hpp"          // utils::exception::Code, utils::exception::Type, utils::exception::Message
     #include "../attribute/Attribute.hpp"   // nodiscard
     #include <source_location>              // std::source_location
+    #include <unordered_map>                // std::unordered_map
     #include <cstdint>                      // std::uint8_t
     #include <cstddef>                      // std::size_t
     #include <limits>                       // std::numeric_limits
@@ -33,12 +34,12 @@ namespace utils::exception { // namespace start
 class AException: public utils::exception::IException {
     private:
         /* Exception Data */
-        std::vector<const char*> Message;
-        std::vector<const char*> Info;
-        std::vector<std::uint8_t> Restriction;
+        std::unordered_map<utils::exception::Code, const char*> Message;
+        std::unordered_map<utils::exception::Code, const char*> Info;
+        std::unordered_map<utils::exception::Code, const std::uint8_t> Restriction;
 
         // --------- Pre-Function --------- //
-        void subinit();
+        void subinit(void);
 
     protected:
         /* Exception call info */
@@ -54,18 +55,18 @@ class AException: public utils::exception::IException {
 
     public:
         // --------- Pre-Function --------- //
-        std::string formated() const noexcept final;
+        std::string formated(void) const noexcept final;
 
         // ----------- Function ----------- //
         // auto -> const std::array<type auto, size auto>
-        nodiscard utils::exception::Type getType() const noexcept final {return this->_type;};
-        nodiscard utils::exception::Code getCode() const noexcept final {return this->_code;};
-        nodiscard bool isNone() const noexcept final {return (this->_type & utils::exception::Type::None);};
-        nodiscard bool isFatal() const noexcept final {return (this->_type & utils::exception::Type::Fatal);};
-        nodiscard const char* what() const noexcept final {return this->Message[static_cast<std::size_t>(this->_code)];};
-        nodiscard const char* info() const noexcept final {return this->_info.c_str();};
-        nodiscard const std::source_location& loc() const noexcept final {return this->_loc;};
-    
+        nodiscard utils::exception::Type getType(void) const noexcept final {return this->_type;};
+        nodiscard utils::exception::Code getCode(void) const noexcept final {return this->_code;};
+        nodiscard bool isNone(void) const noexcept final {return (this->_type & utils::exception::Type::None);};
+        nodiscard bool isFatal(void) const noexcept final {return (this->_type & utils::exception::Type::Fatal);};
+        nodiscard const char* what(void) const noexcept final {return this->Message.at(this->_code);};
+        nodiscard const char* info(void) const noexcept final {return this->_info.c_str();};
+        nodiscard const std::source_location& loc(void) const noexcept final {return this->_loc;};
+
         // ------------ Operator ---------- //
         AException& operator=(const AException& other) = delete;
         AException& operator=(AException&& other) = delete;
@@ -77,10 +78,9 @@ class AException: public utils::exception::IException {
             _loc{loc}, _file{loc.file_name()}, _func{loc.function_name()}, _line{loc.line()},
             _info{info}, _type{type}, _code{code}
         {
-            std::size_t size = static_cast<std::size_t>(utils::exception::Code::CODE_SENTINEL);
-            this->Message.assign(utils::exception::Message, utils::exception::Message + size);
-            this->Info.assign(utils::exception::Info, utils::exception::Info + size);
-            this->Restriction.assign(utils::exception::Restriction, utils::exception::Restriction + size);
+            this->Message.insert(std::begin(utils::exception::Message), std::end(utils::exception::Message));
+            this->Info.insert(std::begin(utils::exception::Info), std::end(utils::exception::Info));
+            this->Restriction.insert(std::begin(utils::exception::Restriction), std::end(utils::exception::Restriction));
             this->subinit();
         }
         AException(const AException& other) = delete;

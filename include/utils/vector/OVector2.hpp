@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 19/05/2026 by @author Tsukini
+##  @date 06/07/2026 by @author Tsukini
 
 File Name:
 ##  @file OVector2.hpp
@@ -45,7 +45,8 @@ namespace utils::vector { // namespace start
 /* CLASS */
 
 template<typename T>
-class outdated("OVector2 dosen't have any concepts safty (Be careful!!!)") OVector2 {
+//class outdated("OVector2 dosen't have any concepts safty (Be careful!!!)") OVector2 {
+class OVector2 {
     public:
         T x;
         T y;
@@ -70,13 +71,13 @@ class outdated("OVector2 dosen't have any concepts safty (Be careful!!!)") OVect
         template<typename U>
         inline T cross(const OVector2<U>& v) const
         {return x * v.y - y * v.x;}
-        inline T length() const
+        inline T length(void) const
         {return std::sqrt(x * x + y * y);}
-        inline T lengthSquared() const
+        inline T lengthSquared(void) const
         {return x * x + y * y;}
-        inline OVector2 sign() const
+        inline OVector2 sign(void) const
         {return {(x > 0) - (x < 0), (y > 0) - (y < 0)};}
-        OVector2 normalize() const
+        OVector2 normalize(void) const
         {
             T len = length();
             return {x / len, y / len};
@@ -121,7 +122,7 @@ class outdated("OVector2 dosen't have any concepts safty (Be careful!!!)") OVect
         {return {x / v.x, y / v.y};}
 
         // -------- Special-Operator -------- //
-        inline OVector2& operator++()
+        inline OVector2& operator++(void)
         {++x; ++y; return *this;}
         inline OVector2 operator++(int)
         {
@@ -129,7 +130,7 @@ class outdated("OVector2 dosen't have any concepts safty (Be careful!!!)") OVect
             ++(*this);
             return tmp;
         }
-        inline OVector2& operator--()
+        inline OVector2& operator--(void)
         {--x; --y; return *this;}
         inline OVector2 operator--(int)
         {
@@ -230,7 +231,7 @@ class outdated("OVector2 dosen't have any concepts safty (Be careful!!!)") OVect
         {return (x >= v.x && y >= v.y);}
 
         // ------------ Unary ------------- //
-        inline OVector2 operator-() const
+        inline OVector2 operator-(void) const
         {return {-x, -y};}
 
         // ---------- Constructor --------- //

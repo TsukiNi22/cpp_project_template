@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 25/05/2026 by @author Tsukini
+##  @date 04/06/2026 by @author Tsukini
 
 File Name:
 ##  @file main.cpp
@@ -29,6 +29,7 @@ cold nodiscard int main(unused int argc, unused const char* argv[])
         */
     } catch (const utils::exception::IException& e) { // Custom error
         std::cout << e.formated() << std::endl;
+        return KO;
     }
     return OK;
 }

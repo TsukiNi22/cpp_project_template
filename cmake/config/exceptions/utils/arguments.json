@@ -1,0 +1,59 @@
+{
+    "errors": [
+        {
+            "code": "ArgumentsNumber",
+            "message": "Invalid number of argument(s) given, use '-h' for more information",
+            "restrictions": ["Fatal", "Error"]
+        },
+        {
+            "code": "OptionIngored",
+            "message": "Option ignored, can't determine it's ownership",
+            "restrictions": ["Fatal", "Error", "Warning"]
+        },
+        {
+            "code": "UnknowFlag",
+            "message": "Unknow flag",
+            "restrictions": ["Fatal", "Error", "Warning"]
+        },
+        {
+            "code": "NoCompliantUsage",
+            "message": "No compliant usage where found, use '-h' for more information",
+            "restrictions": ["Fatal", "Error"]
+        },
+        {
+            "code": "ArgParserHook",
+            "message": "Error during an execution of hook",
+            "restrictions": ["Fatal", "Error"]
+        },
+        {
+            "code": "OptionsNumber",
+            "message": "Invalid number of option(s) given, use '-h' for more information",
+            "restrictions": ["Fatal", "Error"]
+        },
+        {
+            "code": "FlagOptionsNumber",
+            "message": "Invalid number of option(s) for the flag",
+            "restrictions": ["Fatal", "Error"]
+        },
+        {
+            "code": "Option",
+            "message": "Invalid option, the parsing hook has failed",
+            "restrictions": ["Fatal", "Error", "Warning"]
+        },
+        {
+            "code": "FlagOption",
+            "message": "Invalid flag option, the parsing hook has failed",
+            "restrictions": ["Fatal", "Error", "Warning"]
+        },
+        {
+            "code": "FlagCombinaison",
+            "message": "Invalid flag combinaison",
+            "restrictions": ["Fatal", "Error", "Warning"]
+        },
+        {
+            "code": "DuplicatedFlag",
+            "message": "A flag was redefined, only the first will be used",
+            "restrictions": ["Fatal", "Error", "Warning"]
+        }
+    ]
+}

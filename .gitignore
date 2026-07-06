@@ -1,6 +1,7 @@
 ## Compilation
 *.o
 *.a
+!cmake/libs/*.a
 *.so
 a.out
 
@@ -12,6 +13,10 @@ a.out
 q
 vg
 z
+
+## Doxygen
+/html
+/latex
 
 ## CMake
 build/
