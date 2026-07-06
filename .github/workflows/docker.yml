@@ -3,7 +3,7 @@ name: Build CI image
 on:
   push:
     paths:
-      - '.github/docker/Dockerfile'
+      - '.github/docker/ci.Dockerfile'
     branches: [main]
 
 jobs:
@@ -20,5 +20,5 @@ jobs:
           password: ${{ secrets.GIT_TOKEN }}
       - run: |
           REPOSITORY_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker build -t ghcr.io/$REPOSITORY_OWNER_LOWERCASE/ci:latest -f .github/docker/Dockerfile .github/docker/
+          docker build -t ghcr.io/$REPOSITORY_OWNER_LOWERCASE/ci:latest -f .github/docker/ci.Dockerfile .github/docker/
           docker push ghcr.io/$REPOSITORY_OWNER_LOWERCASE/ci:latest

@@ -7,7 +7,7 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - '.github/docker/Dockerfile'
+      - '.github/docker/ci.Dockerfile'
   pull_request:
     branches: [main]
 
@@ -16,6 +16,7 @@ env:
 
 jobs:
   docker-changes:
+    if: github.event_name != 'workflow_run'
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -29,7 +30,7 @@ jobs:
         with:
           filters: |
             dockerfile:
-              - '.github/docker/Dockerfile'
+              - '.github/docker/ci.Dockerfile'
       - name: Report skipped as neutral check
         if: steps.filter.outputs.dockerfile == 'true'
         uses: actions/github-script@v7
@@ -44,7 +45,7 @@ jobs:
               conclusion: 'neutral',
               output: {
                 title: 'Build skipped',
-                summary: 'Skipped because .github/docker/Dockerfile was modified in this push.'
+                summary: 'Skipped because .github/docker/ci.Dockerfile was modified in this push.'
               }
             });
 
