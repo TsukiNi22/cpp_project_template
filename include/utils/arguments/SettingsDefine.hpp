@@ -11,34 +11,83 @@ Edition:
 ##  @date 08/07/2026 by @author Tsukini
 
 File Name:
-##  @file c2dmp-hsm.hpp
+##  @file SettingsDefine.hpp
 
 File Description:
-##  Header for include all the different algorithm
+##  You know, I don t think there are good or bad descriptions,
+##  for me, life is all about functions...
 \**************************************************************/
 
-#ifndef C2DMP_HSM_H
-    #define C2DMP_HSM_H
+#ifndef SETTINGSDEFINE_H
+    #define SETTINGSDEFINE_H
 
     //----------------------------------------------------------------//
     /* INCLUDE */
 
-    /* algorithm */
-    #include "algorithm/optimized.hpp"  // utils::algorithms::c2dmp::c2dmp_optimized
-    #include "algorithm/foptimized.hpp" // utils::algorithms::c2dmp::c2dmp_foptimized
+    /* type */
+    #if __has_include(<cstdfloat>)
+        #include <cstdfloat>
+    #endif
 
-namespace utils::algorithms::c2dmp { // namespace start
+namespace utils::arguments { // namespace start
+//----------------------------------------------------------------//
+/* TYPE */
 
-// rediretion
-template<std::uint_fast8_t prefixDepthSearch = 3, typename UINTN = std::uint_fast8_t, bool full = false>
-inline float c2dmp(const std::string_view a, const std::string_view b)
-{
-    if constexpr (full) {
-        return utils::algorithms::c2dmp::c2dmp_foptimized<prefixDepthSearch, UINTN>(a, b);
-    } else {
-        return utils::algorithms::c2dmp::c2dmp_optimized<prefixDepthSearch, UINTN>(a, b);
-    }
-}
+#if __has_include(<cstdfloat>)
+    using float16_t  = std::float16_t;
+    using float32_t  = std::float32_t;
+    using float64_t  = std::float64_t;
+    using float128_t = std::float128_t;
+#else
+    using float16_t  = float;
+    using float32_t  = float;
+    using float64_t  = double;
+    using float128_t = long double;
+#endif
+
+//----------------------------------------------------------------//
+/* ENUM */
+
+enum class CastType: std::size_t {
+    None = 0,
+
+    /* basic */
+    Byte,
+    Bool,
+
+    /* integer */
+    Int8,
+    Int16,
+    Int32,
+    Int64,
+
+    /* unsigned integer */
+    UInt8,
+    UInt16,
+    UInt32,
+    UInt64,
+
+    /* floating */
+    Float16,
+    Float32,
+    Float64,
+    Float128,
+
+    /* char */
+    Char8,
+    Char16,
+    Char32,
+    U8String,
+    U16String,
+    U32String,
+
+    /* huge char */
+    WChar,
+    WString,
+
+    /* special */
+    Path,
+};
 
 } // namespace end
-#endif /* C2DMP_HSM_H */
+#endif /* SETTINGSDEFINE_H */
