@@ -3,6 +3,8 @@ name: CI - Executables
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '.github/**'
 
 env:
   EXECUTABLES: "template"
@@ -19,12 +21,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
       - name: Cache ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /github/home/.cache/ccache
           key: ccache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', 'cmake/libs/*.a', 'CMakeLists.txt') }}
