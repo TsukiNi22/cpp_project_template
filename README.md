@@ -2,6 +2,13 @@
 
 A ready-to-use C++20 project template (CMake, Clang, ccache, generated exception headers).
 
+## Dependencies
+
+| Name + Link | Status | Last Update |
+| ----------- | ------ | ----------- |
+| [my_lib_cpp](https://github.com/TsukiNi22/my_lib_cpp) | ![CI/CD - Library](https://github.com/TsukiNi22/my_lib_cpp/actions/workflows/build-sync.yml/badge.svg) | ![](https://img.shields.io/github/last-commit/TsukiNi22/my_lib_cpp) |
+
+
 ## Quick Setup
 
 Run the setup script directly, without cloning the repository manually. It downloads the latest version of the template from `main`, renames every `project` occurrence to your chosen project name, and commits/pushes the result to the current repository.
