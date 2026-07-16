@@ -41,8 +41,12 @@ add_compile_options(
 # Sources
 # =========================
 set(SRC
-    # Main
+    # Entry
     src/template/main.cpp
+    src/template/Core-init.cpp
+
+    # Main
+    src/template/Core.cpp
 )
 add_executable(${TARGET} ${SRC})
 

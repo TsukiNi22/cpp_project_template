@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 06/07/2026 by @author Tsukini
+##  @date 16/07/2026 by @author Tsukini
 
 File Name:
 ##  @file main.cpp
@@ -16,17 +16,15 @@ File Description:
 #include <exception>
 #include <iostream>
 
-cold nodiscard int main(unused int argc, unused const char* argv[])
+cold nodiscard int main(int argc, const char* argv[])
 {
     // Init core class ...
-    //template::Core core;
+    template::Core core;
 
     try {
         // Call to the main endpoint
-        /*
         core.init(argc, argv);
         core.run();
-        */
     } catch (const utils::exception::IException& e) { // Custom error
         std::cout << e.formated() << std::endl;
         return KO;

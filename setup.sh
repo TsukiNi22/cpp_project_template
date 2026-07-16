@@ -12,6 +12,7 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 PROJECT_NAME="$1"
+CORE_NAME="$2"
 
 ##### Clone into a temporary directory #####
 TMP_DIR="$(mktemp -d)"
@@ -38,6 +39,20 @@ done
 echo "Replacing 'template' references inside files..."
 grep -rlZE --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" --include=".gitignore" '\btemplate\b' "$TARGET_DIR" 2>/dev/null \
     | xargs -0 -r sed -i "s/\btemplate\b/${PROJECT_NAME}/g"
+
+##### Rename files/directories containing 'Core' #####
+echo "Renaming files and directories: 'Core' -> '${CORE_NAME}'..."
+find "$TARGET_DIR" -depth -iname "*Core*" -not -path "*/.git/*" | while read -r path; do
+    new_path="$(dirname "$path")/$(basename "$path" | sed "s/Core/${CORE_NAME}/g")"
+    if [ "$path" != "$new_path" ]; then
+        mv "$path" "$new_path"
+    fi
+done
+
+##### Replace 'Core' inside file contents (CMakeLists.txt, headers, sources) #####
+echo "Replacing 'Core' references inside files..."
+grep -rlZE --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" '\bCore\b' "$TARGET_DIR" 2>/dev/null \
+    | xargs -0 -r sed -i "s/\bCore\b/${CORE_NAME}/g"
 
 ##### Commit and push #####
 cd "$TARGET_DIR"
