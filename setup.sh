@@ -26,6 +26,10 @@ rm -rf "$TMP_DIR/.git"
 mkdir -p "$TARGET_DIR"
 cp -r "$TMP_DIR"/. "$TARGET_DIR"/
 
+##### Remove file & content that are only here for the template repository #####
+sed -i "/# Don't run on template repository/{N;d;}" "$TARGET_DIR/.github/workflows/build.yml" # Remove build start condition
+rm $TARGET_DIR/.github/workflows/setup.yml # Check of the script execution
+
 ##### Rename files/directories containing 'template' #####
 echo "Renaming files and directories: 'template' -> '${PROJECT_NAME}'..."
 find "$TARGET_DIR" -depth -iname "*template*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do

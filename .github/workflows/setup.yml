@@ -1,4 +1,4 @@
-name: CI - Executables
+name: CI - Setup
 
 on:
   push:
@@ -7,13 +7,12 @@ on:
       - '.github/**'
 
 env:
-  EXECUTABLES: "template"
+  # Names for testing purpose only
+  PROJECT_NAME: "testing"
+  CORE_NAME: "Test"
 
 jobs:
   build-executables:
-    # Don't run on template repository
-    if: github.repository != 'TsukiNi22/cpp_project_template'
-
     runs-on: ${{ vars.RUNNER }}
     defaults:
       run:
@@ -23,10 +22,12 @@ jobs:
       image: ghcr.io/tsukini22/ci:latest
 
     steps:
-      - name: Checkout repository
+      - name: Setup repository
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 1
+        run: |
+          set -e
+          wget -qO- https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main/setup.sh | bash -s -- $PROJECT_NAME $CORE_NAME
+        timeout-minutes: 2
 
       - name: Cache ccache
         uses: actions/cache@v5
@@ -48,14 +49,12 @@ jobs:
       - name: Check executables
         run: |
           set -euo pipefail
-          for executable in $(echo $EXECUTABLES | tr ',' ' ' | xargs); do
-            if [ ! -f "./$executable" ]; then
-              echo "::error title=Missing executable, file=$executable::Executable '$executable' not found"
-              exit 1
-            fi
-            if [ ! -x "$executable" ]; then
-              echo "::error title=Permission error,file=$executable::Executable '$executable' has no execution permission"
-              exit 1
-            fi
-            echo "✓ Executable '$executable' ok"
-          done
+          if [ ! -f "./$PROJECT_NAME" ]; then
+            echo "::error title=Missing executable, file=$PROJECT_NAME::Executable '$PROJECT_NAME' not found"
+            exit 1
+          fi
+          if [ ! -x "$PROJECT_NAME" ]; then
+            echo "::error title=Permission error,file=$PROJECT_NAME::Executable '$PROJECT_NAME' has no execution permission"
+            exit 1
+          fi
+          echo "✓ Executable '$PROJECT_NAME' ok"
