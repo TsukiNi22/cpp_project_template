@@ -7,8 +7,8 @@ BRANCH="main"
 TARGET_DIR="."
 
 ##### Argument #####
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <project_name>"
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <project_name> <core_name>"
     exit 1
 fi
 PROJECT_NAME="$1"
