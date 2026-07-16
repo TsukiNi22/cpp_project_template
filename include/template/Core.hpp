@@ -37,7 +37,7 @@ class Core {
 
     public:
         // ---------- Pre-Function -------- //
-        void init(int argc, const char* argv[]);
+        void init(int argc, const char *const argv[]);
         void run(void);
 
         // ------------ Function ---------- //

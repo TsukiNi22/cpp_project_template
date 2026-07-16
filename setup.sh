@@ -28,7 +28,7 @@ cp -r "$TMP_DIR"/. "$TARGET_DIR"/
 
 ##### Rename files/directories containing 'template' #####
 echo "Renaming files and directories: 'template' -> '${PROJECT_NAME}'..."
-find "$TARGET_DIR" -depth -iname "*template*" -not -path "*/.git/*" | while read -r path; do
+find "$TARGET_DIR" -depth -iname "*template*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
     new_path="$(dirname "$path")/$(basename "$path" | sed "s/template/${PROJECT_NAME}/g")"
     if [ "$path" != "$new_path" ]; then
         mv "$path" "$new_path"
@@ -37,12 +37,12 @@ done
 
 ##### Replace 'template' inside file contents (CMakeLists.txt, .gitignore, headers, sources) #####
 echo "Replacing 'template' references inside files..."
-grep -rlZE --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" --include=".gitignore" '\btemplate\b' "$TARGET_DIR" 2>/dev/null \
+grep -rlZE --exclude-dir=.git --exclude-dir=utils --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" --include=".gitignore" '\btemplate\b' "$TARGET_DIR" 2>/dev/null \
     | xargs -0 -r sed -i "s/\btemplate\b/${PROJECT_NAME}/g"
 
 ##### Rename files/directories containing 'Core' #####
 echo "Renaming files and directories: 'Core' -> '${CORE_NAME}'..."
-find "$TARGET_DIR" -depth -iname "*Core*" -not -path "*/.git/*" | while read -r path; do
+find "$TARGET_DIR" -depth -iname "*Core*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
     new_path="$(dirname "$path")/$(basename "$path" | sed "s/Core/${CORE_NAME}/g")"
     if [ "$path" != "$new_path" ]; then
         mv "$path" "$new_path"
@@ -51,7 +51,7 @@ done
 
 ##### Replace 'Core' inside file contents (CMakeLists.txt, headers, sources) #####
 echo "Replacing 'Core' references inside files..."
-grep -rlZE --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" '\bCore\b' "$TARGET_DIR" 2>/dev/null \
+grep -rlZE --exclude-dir=.git --exclude-dir=utils --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" '\bCore\b' "$TARGET_DIR" 2>/dev/null \
     | xargs -0 -r sed -i "s/\bCore\b/${CORE_NAME}/g"
 
 ##### Commit and push #####
