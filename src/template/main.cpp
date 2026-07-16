@@ -13,6 +13,7 @@ File Description:
 #define _Exception
 #define _Attribute
 #include "utils/utils.hpp"
+#include "template/Core.hpp"
 #include <exception>
 #include <iostream>
 

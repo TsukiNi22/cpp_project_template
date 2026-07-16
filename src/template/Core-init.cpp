@@ -78,10 +78,10 @@ void template::Core::init(int argc, const char *const argv[])
     for (const auto& [id, _, options]: usages.front().arguments) {
         const std::string& value = (options.empty() ? "" : options.front());
         if (id == "verbose") {
-            if      (value == "none")     set_verbose(zappy::Verbose::None)
-            else if (value == "basic")    set_verbose(zappy::Verbose::Basic)
-            else if (value == "advanced") set_verbose(zappy::Verbose::Advanced)
-            else if (value == "debug")    set_verbose(zappy::Verbose::Debug)
+            if      (value == "none")     set_verbose(None)
+            else if (value == "basic")    set_verbose(Basic)
+            else if (value == "advanced") set_verbose(Advanced)
+            else if (value == "debug")    set_verbose(Debug)
         }
     }
 
