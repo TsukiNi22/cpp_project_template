@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 16/07/2026 by @author Tsukini
+##  @date 17/07/2026 by @author Tsukini
 
 File Name:
 ##  @file main.cpp
@@ -27,6 +27,7 @@ cold nodiscard int main(int argc, const char* argv[])
         core.init(argc, argv);
         core.run();
     } catch (const utils::exception::IException& e) { // Custom error
+        if (e.isNone() && e.getCode() == utils::exception::Code::Exit) return OK; // Exit - no error
         std::cout << e.formated() << std::endl;
         return KO;
     }
