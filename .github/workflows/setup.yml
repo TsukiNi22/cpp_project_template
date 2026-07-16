@@ -3,8 +3,6 @@ name: CI - Setup
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - '.github/**'
 
 env:
   # Names for testing purpose only
@@ -23,7 +21,6 @@ jobs:
 
     steps:
       - name: Setup repository
-        uses: actions/checkout@v5
         run: |
           set -e
           wget -qO- https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main/setup.sh | bash -s -- $PROJECT_NAME $CORE_NAME
