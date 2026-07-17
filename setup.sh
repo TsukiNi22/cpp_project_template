@@ -7,12 +7,21 @@ BRANCH="main"
 TARGET_DIR="."
 
 ##### Argument #####
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <project_name> <core_name>"
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+    echo "Usage: $0 <project_name> <core_name> [-push]"
     exit 1
 fi
 PROJECT_NAME="$1"
 CORE_NAME="$2"
+
+# Auto push on repository
+PUSH=false
+if [ "${3:-}" = "-push" ]; then
+    PUSH=true
+else
+    echo "Usage: $0 <project_name> <core_name> [-push]"
+    exit 1
+fi
 
 ##### Clone into a temporary directory #####
 TMP_DIR="$(mktemp -d)"
@@ -60,8 +69,13 @@ grep -rlZE --exclude-dir=.git --exclude-dir=utils --include="*.cpp" --include="*
 
 ##### Commit and push #####
 cd "$TARGET_DIR"
-git add .
-git commit -m "Setup c++20 project template"
-git push
+if [ "$PUSH" = true ]; then
+    echo "Pushing changes..."
+    git add .
+    git commit -m "Setup c++20 project template"
+    git push
+else
+    echo "Skipping git push (use -push to enable)"
+fi
 
 echo "Project '${PROJECT_NAME}' set up in '${TARGET_DIR}'"

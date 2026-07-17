@@ -13,14 +13,17 @@ A ready-to-use C++20 project template (CMake, Clang, ccache, generated exception
 
 Run the setup script directly, without cloning the repository manually. It downloads the latest version of the template from `main`, renames every `project` occurrence to your chosen project name, and commits/pushes the result to the current repository.
 
+> [!IMPORTANT]
+> Remove `-push` to disable the automatic commit of the setup
+
 ```bash
-wget -qO- https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main/setup.sh | bash -s -- <project_name> <core_name>
+wget -qO- https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main/setup.sh | bash -s -- <project_name> <core_name> -push
 ```
 
 or with `curl`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main/setup.sh | bash -s -- <project_name> <core_name>
+curl -fsSL https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main/setup.sh | bash -s -- <project_name> <core_name> -push
 ```
 
 > [!IMPORTANT]
