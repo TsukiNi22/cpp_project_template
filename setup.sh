@@ -2,13 +2,14 @@
 set -euo pipefail
 
 ##### Configuration #####
+SCRIPT_NAME="setup.sh"
 REPO_URL="https://github.com/TsukiNi22/cpp_project_template.git"
 BRANCH="main"
 TARGET_DIR="."
 
 ##### Argument #####
 if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
-    echo "Usage: $0 <project_name> <core_name> [-push]"
+    echo "Usage: $SCRIPT_NAME <project_name> <core_name> [-push]"
     exit 1
 fi
 PROJECT_NAME="$1"
@@ -19,7 +20,7 @@ PUSH=false
 if [ "$#" -eq 3 ] && [ "${3}" = "-push" ]; then
     PUSH=true
 elif [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <project_name> <core_name> [-push]"
+    echo "Usage: $SCRIPT_NAME <project_name> <core_name> [-push]"
     exit 1
 fi
 
@@ -36,7 +37,7 @@ mkdir -p "$TARGET_DIR"
 cp -r "$TMP_DIR"/. "$TARGET_DIR"/
 
 ##### Remove file & content that are only here for the template repository #####
-rm $0 # Remove this script
+rm $SCRIPT_NAME # Remove this script
 rm $TARGET_DIR/.github/workflows/setup.yml # Check of the script execution
 sed -i "/# Don't run on template repository/{N;d;}" "$TARGET_DIR/.github/workflows/build.yml" # Remove build start condition
 
