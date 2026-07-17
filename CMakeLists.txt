@@ -73,13 +73,24 @@ add_custom_target(generated_exception_header
 )
 
 # =========================
+# Release (build Optimized)
+# =========================
+add_custom_target(release
+    COMMAND ${CMAKE_COMMAND} -S ${CMAKE_SOURCE_DIR} -B ${CMAKE_BINARY_DIR} -DCMAKE_BUILD_TYPE=Optimized
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --parallel
+    COMMENT "Release version: Optimized"
+    VERBATIM
+)
+
+# =========================
 # Dependencies
 # =========================
 target_include_directories(${TARGET} PRIVATE include)
 target_link_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/cmake/libs/)
 target_link_libraries(${TARGET} PRIVATE
     $<$<CONFIG:Debug>:utils_debug>
-    $<$<NOT:$<CONFIG:Debug>>:utils>
+    $<$<CONFIG:Asan>:utils_asan>
+    $<$<AND:$<NOT:$<CONFIG:Debug>>,$<NOT:$<CONFIG:Asan>>>:utils>
 )
 add_dependencies(${TARGET} generated_exception_header)
 
@@ -88,7 +99,8 @@ add_dependencies(${TARGET} generated_exception_header)
 # =========================
 target_compile_options(${TARGET} PRIVATE
     $<$<CONFIG:Debug>:-g -ggdb3>
-    $<$<CONFIG:Optimized>:-O3 -ffast-math -march=native -mtune=generic -funroll-loops -pipe -DNDEBUG>
+    $<$<CONFIG:Asan>:-fsanitize=address -fno-omit-frame-pointer -g -ggdb3>
+    $<$<CONFIG:Optimized>:-O3 -ffast-math -march=native -funroll-loops -pipe -DNDEBUG>
 )
 
 # =========================
