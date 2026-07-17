@@ -16,9 +16,9 @@ CORE_NAME="$2"
 
 # Auto push on repository
 PUSH=false
-if [ "${3:-}" = "-push" ]; then
+if [ "$#" -eq 3 ] && [ "${3}" = "-push" ]; then
     PUSH=true
-else
+elif [ "$#" -ne 2 ]; then
     echo "Usage: $0 <project_name> <core_name> [-push]"
     exit 1
 fi
@@ -36,8 +36,9 @@ mkdir -p "$TARGET_DIR"
 cp -r "$TMP_DIR"/. "$TARGET_DIR"/
 
 ##### Remove file & content that are only here for the template repository #####
-sed -i "/# Don't run on template repository/{N;d;}" "$TARGET_DIR/.github/workflows/build.yml" # Remove build start condition
+rm $0 # Remove this script
 rm $TARGET_DIR/.github/workflows/setup.yml # Check of the script execution
+sed -i "/# Don't run on template repository/{N;d;}" "$TARGET_DIR/.github/workflows/build.yml" # Remove build start condition
 
 ##### Rename files/directories containing 'template' #####
 echo "Renaming files and directories: 'template' -> '${PROJECT_NAME}'..."
