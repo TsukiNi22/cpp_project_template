@@ -10,7 +10,7 @@ env:
   CORE_NAME: "Test"
 
 jobs:
-  build-executables:
+  setup-template:
     runs-on: ${{ vars.RUNNER }}
     defaults:
       run:
