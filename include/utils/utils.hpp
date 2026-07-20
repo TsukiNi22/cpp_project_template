@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 16/07/2026 by @author Tsukini
+##  @date 20/07/2026 by @author Tsukini
 
 File Name:
 ##  @file utils.hpp
@@ -12,9 +12,10 @@ File Description:
 //----------------------------------------------------------------//
 /* DEFINE */
 
-/* Desactivate all automatic warning & outdated message */
+/* Desactivate all automatic warning & _deprecated message */
 #ifdef _NoWarning
-    #define NO_OUTDATED_WARNING // outdated(...)
+    #define NO_DEPRECATED_WARNING // _deprecated(...)
+    #define NO_LINKER_WARNING // Linker requirement
     //#define NO_SHARED_OBJECT_WARNING // shared object
     //#warning "All warnings from 'utils/utils.hpp' are disable"
 #endif
@@ -83,13 +84,14 @@ File Description:
 
 /* Write */
 #ifdef _Write
-    // -> Handling of the ANSI escape sequences
-    // -> Define some special char & other
-    #include "write/Color.hpp"  // utils::write::Color, utils::write::BackColor
-    #include "write/Char.hpp"   // utils::write::Char
-    #include "write/Style.hpp"  // utils::write::Style, utils::write::ResetStyle
-    #include "write/ANSI.hpp"   // different inline function for ANSI escape sequences
-    #include "write/format.hpp" // utils::write::format
+    // -> Handling of string/ouput manipulation
+    // -> Define some special char & other, ANSI escape sequences, ...
+    #include "write/Color.hpp"       // utils::write::Color, utils::write::BackColor
+    #include "write/Char.hpp"        // utils::write::Char
+    #include "write/Style.hpp"       // utils::write::Style, utils::write::ResetStyle
+    #include "write/ANSI.hpp"        // different inline function for ANSI escape sequences
+    #include "write/format.hpp"      // utils::write::format
+    #include "write/codec/Codec.hpp" // utils::write::codec::ICodec, utils::write::codec::*Codec
 #endif
 
 /* Cli */
