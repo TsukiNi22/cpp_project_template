@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 16/07/2026 by @author Tsukini
+##  @date 20/07/2026 by @author Tsukini
 
 File Name:
 ##  @file Core-init.cpp
@@ -25,7 +25,7 @@ File Description:
 #include <optional>
 #include <string>
 
-static nodiscard std::optional<std::string> StatusParsingHook(const std::string& option)
+_nodiscard static std::optional<std::string> StatusParsingHook(const std::string& option)
 {
     try {
         if (option.empty())
@@ -37,7 +37,7 @@ static nodiscard std::optional<std::string> StatusParsingHook(const std::string&
     }
 }
 
-static nodiscard std::optional<std::string> VerboseParsingHook(const std::string& option)
+_nodiscard static std::optional<std::string> VerboseParsingHook(const std::string& option)
 {
     if (option == "none" || option == "basic" || option == "advanced" || option == "debug") return std::nullopt;
     return "Invalid verbose level, should be (none|basic|advanced|debug), but got: " + option;

@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 17/07/2026 by @author Tsukini
+##  @date 20/07/2026 by @author Tsukini
 
 File Name:
 ##  @file main.cpp
@@ -17,7 +17,7 @@ File Description:
 #include <exception>
 #include <iostream>
 
-cold nodiscard int main(int argc, const char* argv[])
+_cold _nodiscard int main(int argc, const char* argv[])
 {
     // Init core class ...
     template::Core core;
