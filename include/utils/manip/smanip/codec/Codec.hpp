@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 19/07/2026 by @author Tsukini
+##  @date 25/07/2026 by @author Tsukini
 
 File Name:
 ##  @file Codec.hpp
@@ -24,9 +24,9 @@ File Description:
     /* INCLUDE */
 
     /* interface */
-    #include "ICodec.hpp"   // utils::iomanip::codec::ICodec
+    #include "ICodec.hpp"   // utils::smanip::codec::ICodec
 
     /* codec (basic) */
-    #include "Base64Codec.hpp"  // utils::iomanip::codec::Base64Codec
+    #include "Base64Codec.hpp"  // utils::smanip::codec::Base64Codec
 
 #endif /* CODEC_H */
