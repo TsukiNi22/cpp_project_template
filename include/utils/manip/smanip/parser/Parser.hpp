@@ -27,6 +27,6 @@ File Description:
     #include "IParser.hpp"   // utils::smanip::parser::IParser
 
     /* parser (default) */
-    //#include "EETPParser.hpp"  // utils::smanip::parser::Base64Parser
+    #include "EETPParser.hpp"  // utils::smanip::parser::Base64Parser
 
 #endif /* PARSER_H */
