@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 20/07/2026 by @author Tsukini
+##  @date 27/07/2026 by @author Tsukini
 
 File Name:
 ##  @file Core-init.cpp
@@ -24,18 +24,6 @@ File Description:
 #include "template/Core.hpp"
 #include <optional>
 #include <string>
-
-_nodiscard static std::optional<std::string> StatusParsingHook(const std::string& option)
-{
-    try {
-        if (option.empty())
-            throw std::invalid_argument("empty");
-        if (option == "enable" || option == "disable") return std::nullopt;
-        else return "Invalid status option (enable|disable): " + option;
-    } catch (const std::exception& e) {
-        return std::string(e.what()) + ": " + option;
-    }
-}
 
 _nodiscard static std::optional<std::string> VerboseParsingHook(const std::string& option)
 {
