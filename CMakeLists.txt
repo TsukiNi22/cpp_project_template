@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 set(TARGET template)
-project(${TARGET} LANGUAGES CXX)
+project(${TARGET} VERSION 1.0.0 LANGUAGES CXX)
 
 # =========================
 # Compilateur & Standard
@@ -16,6 +16,7 @@ add_definitions(-D_NoWarning) # Remove warnings from utils (usless for hard impo
 # =========================
 # Requirement
 # =========================
+find_package(utils CONFIG REQUIRED) # Check utils dependencies existance
 find_package(PkgConfig REQUIRED)
 find_package(Python3 REQUIRED) # Used for the special dependencie
 find_program(CCACHE_PROGRAM ccache) # Used for cache during compilation
@@ -85,11 +86,7 @@ add_custom_target(release
 # Dependencies
 # =========================
 target_include_directories(${TARGET} PRIVATE include include/exception)
-target_link_libraries(${TARGET} PRIVATE
-    $<$<CONFIG:Debug>:utils_debug>
-    $<$<CONFIG:Asan>:utils_asan>
-    $<$<AND:$<NOT:$<CONFIG:Debug>>,$<NOT:$<CONFIG:Asan>>>:utils>
-)
+target_link_libraries(${TARGET} PRIVATE utils::utils)
 add_dependencies(${TARGET} generated_exception_header)
 
 # =========================
@@ -100,6 +97,26 @@ target_compile_options(${TARGET} PRIVATE
     $<$<CONFIG:Asan>:-fsanitize=address -fno-omit-frame-pointer -g -ggdb3>
     $<$<CONFIG:Optimized>:-O3 -ffast-math -march=native -funroll-loops -pipe -DNDEBUG>
 )
+target_link_options(${TARGET} PRIVATE
+    $<$<CONFIG:Asan>:-fsanitize=address>
+)
+
+# =========================
+# Installation (no cmake package handling setup)
+# =========================
+include(GNUInstallDirs) # load variable used for installation
+
+# library
+install(TARGETS ${TARGET}
+    EXPORT ${TARGET}Targets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# header
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # =========================
 # Utils
