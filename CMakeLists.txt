@@ -57,7 +57,7 @@ file(GLOB_RECURSE EXCEPTION_CONFIG_FILES
     "${CMAKE_SOURCE_DIR}/cmake/config/exceptions/*.json"
 )
 set(GENERATED_EXCEPTION_HEADER
-    "${CMAKE_SOURCE_DIR}/include/utils/exception/generated_exception_header.hpp"
+    "${CMAKE_SOURCE_DIR}/include/exception/generated_exception_header.hpp"
 )
 add_custom_command(
     OUTPUT ${GENERATED_EXCEPTION_HEADER}
@@ -84,8 +84,7 @@ add_custom_target(release
 # =========================
 # Dependencies
 # =========================
-target_include_directories(${TARGET} PRIVATE include)
-target_link_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/cmake/libs/)
+target_include_directories(${TARGET} PRIVATE include include/exception)
 target_link_libraries(${TARGET} PRIVATE
     $<$<CONFIG:Debug>:utils_debug>
     $<$<CONFIG:Asan>:utils_asan>

@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  27/07/2026 by Tsukini
+##  28/07/2026 by Tsukini
 
 File Name:
 ##  generate_exception_header.py
@@ -70,28 +70,6 @@ for json_file in Path(FILES.CONFIG_EXCEPTION).rglob("*.json"):
                 stderr.write(f"Auto generated header '{FILES.GENERATED_EXCEPTION_HEADER}': FAIL\n")
                 exit(RETURN.KO)
             data[error["code"]] = [error["message"], error["info"] if error.__contains__("info") else "[None]", error["restrictions"] if error.__contains__("restrictions") else []]
-
-# Patern to find enum value
-enum_pattern = re.compile(r'^\s*(\w+)\s*=\s*(0b[01]+)\s*,?')
-
-# Extract the enum values
-with open(FILES.EXCEPTION_DEFINE_HEADER, "r", encoding="utf-8") as f:
-    inside_enum = False
-    for line in f:
-        # Detect the start of the enum
-        if f"enum {NAMES.EXCEPTION_TYPE_ENUM}" in line:
-            inside_enum = True
-            continue
-        # Detect the end of the enum
-        if inside_enum and "};" in line:
-            inside_enum = False
-            continue
-        # Inside the enum, extartc values
-        if inside_enum:
-            match = enum_pattern.match(line)
-            if match:
-                name, value = match.groups()
-                VALUES.EXCEPTION_TYPE[name] = int(value, 2)
 
 # Format the data
 code_str = ""
@@ -202,6 +180,7 @@ static_assert(std::size({NAMES.RESTRICTION_SECTION}) == static_cast<std::size_t>
 """
 
 # Write the file content
+header.parent.mkdir(parents=True, exist_ok=True)
 header.write_text(content)
 
 # Success

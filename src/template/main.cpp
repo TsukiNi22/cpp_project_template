@@ -1,6 +1,6 @@
 /**************************************************************\
 Edition:
-##  @date 25/07/2026 by @author Tsukini
+##  @date 28/07/2026 by @author Tsukini
 
 File Name:
 ##  @file main.cpp
@@ -27,7 +27,7 @@ _cold _nodiscard int main(int argc, const char* argv[])
         core.init(argc, argv);
         core.run();
     } catch (const utils::exception::IException& e) { // Custom error
-        if (e.isNone() && e.getCode() == utils::exception::Code::Exit) return OK; // Exit - no error
+        if (e.isNone() && e.getCode() == utils::exception::InternalCode::Exit) return OK; // Exit - no error
         std::cerr << e.formated() << std::endl;
         return KO;
     }

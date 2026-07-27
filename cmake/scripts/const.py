@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  27/07/2026 by Tsukini
+##  28/07/2026 by Tsukini
 
 File Name:
 ##  const.py
@@ -75,8 +75,7 @@ class Files:
     """
     REQUIREMENTS: str = "cmake/scripts/requirements.txt"
     CONFIG_EXCEPTION: str = "cmake/config/exceptions/"
-    EXCEPTION_DEFINE_HEADER: str = "include/utils/exception/ExceptionDefine.hpp"
-    GENERATED_EXCEPTION_HEADER: str = "include/utils/exception/generated_internal_exception_header.hpp"
+    GENERATED_EXCEPTION_HEADER: str = "include/exception/generated_exception_header.hpp"
 
 @dataclass(frozen=True)
 class Names:
@@ -87,11 +86,11 @@ class Names:
     EXCEPTION_TYPE_ENUM: str = "Type"
 
     # Sections
-    GUARD: str = "INTERNAL_"
-    CODE_SECTION: str = "InternalCode"
-    MESSAGES_SECTION: str = "InternalMessages"
-    INFO_SECTION: str = "InternalInfo"
-    RESTRICTION_SECTION: str = "InternalRestriction"
+    GUARD: str = ""
+    CODE_SECTION: str = "Code"
+    MESSAGES_SECTION: str = "Messages"
+    INFO_SECTION: str = "Info"
+    RESTRICTION_SECTION: str = "Restriction"
 
 ##### Declaration #####
 RETURN  = Return()
