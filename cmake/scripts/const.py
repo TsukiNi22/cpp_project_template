@@ -75,7 +75,7 @@ class Files:
     """
     REQUIREMENTS: str = "cmake/scripts/requirements.txt"
     CONFIG_EXCEPTION: str = "cmake/config/exceptions/"
-    GENERATED_EXCEPTION_HEADER: str = "include/exception/generated_exception_header.hpp"
+    GENERATED_EXCEPTION_HEADER: str = "include/exception/generated_external_exception_header.hpp"
 
 @dataclass(frozen=True)
 class Names:
@@ -87,10 +87,10 @@ class Names:
 
     # Sections
     GUARD: str = ""
-    CODE_SECTION: str = "Code"
-    MESSAGES_SECTION: str = "Messages"
-    INFO_SECTION: str = "Info"
-    RESTRICTION_SECTION: str = "Restriction"
+    CODE_SECTION: str = "ExternalCode"
+    MESSAGES_SECTION: str = "ExternalMessages"
+    INFO_SECTION: str = "ExternalInfo"
+    RESTRICTION_SECTION: str = "ExternalRestriction"
 
 ##### Declaration #####
 RETURN  = Return()
