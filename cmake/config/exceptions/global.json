@@ -1,64 +1,10 @@
 {
     "errors": [
         {
-            "code": "Exit",
-            "message": "Exit",
-            "info": "Exit",
-            "restrictions": ["None"]
+            "code": "Tmp",
+            "message": "This is just a temporary error",
+            "info": "More information maybe?",
+            "restrictions": ["None", "Warning", "Error", "Fatal"]
         },
-        {
-            "code": "Empty",
-            "message": "Empty"
-        },
-        {
-            "code": "UndefinedCall",
-            "message": "This function is not defined and was left as-is",
-            "restrictions": ["Fatal", "Error"]
-        },
-        {
-            "code": "UnauthorizedCall",
-            "message": "Can't allow the call to this function",
-            "restrictions": ["Fatal", "Error"]
-        },
-        {
-            "code": "InvalidArgument",
-            "message": "Invalid argument value",
-            "restrictions": ["Fatal", "Error", "Warning"]
-        },
-        {
-            "code": "UnknowId",
-            "message": "Try to do thing with an unknow id",
-            "restrictions": ["Fatal", "Error", "Warning"]
-        },
-        {
-            "code": "UnknowKey",
-            "message": "Try to do thing with an unknow key",
-            "restrictions": ["Fatal", "Error", "Warning"]
-        },
-        {
-            "code": "Override",
-            "message": "The override is desactivated",
-            "restrictions": ["Fatal", "Error", "Warning"]
-        },
-        {
-            "code": "OutOfBounds",
-            "message": "Bounds have been oversteapaded",
-            "restrictions": ["Fatal", "Error", "Warning"]
-        },
-        {
-            "code": "Freezed",
-            "message": "Can't edit a freezed things",
-            "restrictions": ["Fatal", "Error", "Warning"]
-        },
-        {
-            "code": "BadCast",
-            "message": "Invalid cast between from a type to another",
-            "restrictions": ["Fatal", "Error"]
-        },
-        {
-            "code": "UnknowCast",
-            "message": "Unknow cast type, can't proceed",
-            "restrictions": ["Fatal", "Error"]
-        }
-    ]
+   ]
 }
