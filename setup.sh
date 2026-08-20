@@ -69,6 +69,13 @@ echo "Replacing 'Core' references inside files..."
 grep -rlZE --exclude-dir=.git --exclude-dir=utils --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" '\bCore\b' "$TARGET_DIR" 2>/dev/null \
     | xargs -0 -r sed -i "s/\bCore\b/${CORE_NAME}/g"
 
+##### Set basic README.md #####
+cat << EOF > README.md
+# ${PROJECT_NAME}
+
+Project ${PROJECT_NAME}, look for future update...
+EOF
+
 ##### Commit and push #####
 cd "$TARGET_DIR"
 if [ "$PUSH" = true ]; then
