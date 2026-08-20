@@ -4,10 +4,7 @@
 !cmake/libs/*.a
 *.so
 a.out
-generated_exception_header.hpp
-
-# Executables
-/template
+include/exception/generated_external_exception_header.hpp
 
 ## Vim
 *.sw*
