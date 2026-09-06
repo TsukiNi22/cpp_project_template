@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 27/07/2026 by @author Tsukini
+##  @date 06/09/2026 by @author Tsukini
 
 File Name:
 ##  @file Core-init.cpp
@@ -54,7 +54,7 @@ void template::Core::init(int argc, const char *const argv[])
 
     // Setup the flags
     parser.setFlag("verbose",
-        {"v", "", "verbose"},
+        {"v", "", "verbose", "VERBOSE"},
         {
             {"level", true, VerboseParsingHook}
         },
