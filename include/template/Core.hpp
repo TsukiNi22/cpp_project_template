@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 16/07/2026 by @author Tsukini
+##  @date 06/09/2026 by @author Tsukini
 
 File Name:
 ##  @file Core.hpp
@@ -37,7 +37,7 @@ class Core {
 
     public:
         // ---------- Pre-Function -------- //
-        void init(int argc, const char *const argv[]);
+        void init(const int argc, const char *const argv[]);
         void run(void);
 
         // ------------ Function ---------- //
