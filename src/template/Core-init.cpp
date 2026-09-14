@@ -8,7 +8,7 @@
  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
 
 Edition:
-##  @date 06/09/2026 by @author Tsukini
+##  @date 14/09/2026 by @author Tsukini
 
 File Name:
 ##  @file Core-init.cpp
@@ -36,18 +36,12 @@ void template::Core::init(const int argc, const char *const argv[])
     utils::arguments::ArgParser parser = utils::arguments::ArgParser("template", "...");
 
     // Setup the usages
-    parser.setUsage("template",
-        "default",
-        false,
-        {
-            {"verbose", false},
-        },
-        "Default usage"
-    );
+    parser.setDefaultUsage();
     parser.setUsage("template-small",
         "minimal",
         false,
         {
+            {"verbose", false},
         },
         "Minimal usage"
     );
