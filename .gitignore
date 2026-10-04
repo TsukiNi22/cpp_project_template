@@ -1,7 +1,7 @@
 ## Compilation
+/template
 *.o
 *.a
-!cmake/libs/*.a
 *.so
 a.out
 include/exception/generated_external_exception_header.hpp
@@ -21,7 +21,11 @@ z
 
 ## CMake
 /build
+compile_commands.json
 __pycache__
+
+## Clangd
+/.cache
 
 ## Other
 /runner

@@ -13,7 +13,7 @@ files="$@"
 if [ "$mode" = "unregistered" ]; then
     echo -e "╔═════ 🔻 [${CYAN}Unregistered Files${RESET}] 🔻 ═════╗"
     find src -name "*.cpp" -printf "src/%P\n" | while read file; do
-        echo "$files" | grep -q "$file" || echo "$file"
+        printf '%s\n' $files | grep -qxF "$file" || echo "$file"
     done
     echo -e "╚═════ 🔺 [${CYAN}Unregistered Files${RESET}] 🔺 ═════╝"
 elif [ "$mode" = "unknow" ]; then

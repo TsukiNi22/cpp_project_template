@@ -18,6 +18,7 @@ File Description:
 ##  for me, life is all about functions...
 \**************************************************************/
 
+#define _Attribute
 #define _Verbose
 #define _Arguments
 #include <utils/utils.hpp>

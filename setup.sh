@@ -3,8 +3,9 @@ set -euo pipefail
 
 ##### Configuration #####
 SCRIPT_NAME="setup.sh"
-REPO_URL="https://github.com/TsukiNi22/cpp_project_template.git"
-BRANCH="main"
+REPO_URL="${REPO_URL:-https://github.com/TsukiNi22/cpp_project_template.git}"
+BRANCH="${BRANCH:-main}"
+TEMPLATE_DIR="${TEMPLATE_DIR:-}" # Local copy of the template used instead of the clone (CI)
 TARGET_DIR="."
 
 ##### Argument #####
@@ -24,40 +25,51 @@ elif [ "$#" -ne 2 ]; then
     exit 1
 fi
 
+# Names used as C++ namespace / class and in sed patterns
+for name in "$PROJECT_NAME" "$CORE_NAME"; do
+    if ! [[ "$name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+        echo "Invalid name '$name': must be a valid C++ identifier ([A-Za-z_][A-Za-z0-9_]*)"
+        exit 1
+    fi
+done
+
 ##### Clone into a temporary directory #####
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-echo "Cloning ${REPO_URL} (branch: ${BRANCH})..."
-git clone --depth 1 --branch "$BRANCH" "$REPO_URL" "$TMP_DIR"
+if [ -n "$TEMPLATE_DIR" ]; then
+    echo "Copying the local template ${TEMPLATE_DIR}..."
+    cp -r "$TEMPLATE_DIR"/. "$TMP_DIR"/
+else
+    echo "Cloning ${REPO_URL} (branch: ${BRANCH})..."
+    git clone --depth 1 --branch "$BRANCH" "$REPO_URL" "$TMP_DIR"
+fi
 rm -rf "$TMP_DIR/.git"
 
-##### Move files to the target directory #####
-mkdir -p "$TARGET_DIR"
-cp -r "$TMP_DIR"/. "$TARGET_DIR"/
-
-##### Remove file & content that are only here for the template repository #####
-rm $SCRIPT_NAME # Remove this script
-rm $TARGET_DIR/.github/workflows/setup.yml # Check of the script execution
-sed -i "/# Don't run on template repository/{N;d;}" "$TARGET_DIR/.github/workflows/build.yml" # Remove build start condition
+##### Edit the template copy (never the files already in the target directory) #####
+# Remove file & content that are only here for the template repository
+rm -f "$TMP_DIR/$SCRIPT_NAME" # Remove this script
+rm "$TMP_DIR/.github/workflows/setup.yml" # Check of the script execution
+sed -i "/# Don't run on template repository/{N;d;}" "$TMP_DIR/.github/workflows/build.yml" # Remove build start condition
 
 ##### Rename files/directories containing 'template' #####
 echo "Renaming files and directories: 'template' -> '${PROJECT_NAME}'..."
-find "$TARGET_DIR" -depth -iname "*template*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
+find "$TMP_DIR" -mindepth 1 -depth -iname "*template*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
     new_path="$(dirname "$path")/$(basename "$path" | sed "s/template/${PROJECT_NAME}/g")"
     if [ "$path" != "$new_path" ]; then
         mv "$path" "$new_path"
     fi
 done
 
-##### Replace 'template' inside file contents (CMakeLists.txt, .gitignore, headers, sources) #####
+##### Replace 'template' inside file contents (CMakeLists.txt, .gitignore, headers, sources, workflows) #####
 echo "Replacing 'template' references inside files..."
-grep -rlZE --exclude-dir=.git --exclude-dir=utils --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" --include=".gitignore" '\btemplate\b' "$TARGET_DIR" 2>/dev/null \
+grep -rlZE --exclude-dir=.git --exclude-dir=utils --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" --include=".gitignore" --include="*.yml" '\btemplate\b' "$TMP_DIR" 2>/dev/null \
     | xargs -0 -r sed -i "s/\btemplate\b/${PROJECT_NAME}/g"
+sed -i "s/^PROJECT_NAME\( *\)= .*/PROJECT_NAME\1= \"${PROJECT_NAME}\"/" "$TMP_DIR/Doxyfile"
 
 ##### Rename files/directories containing 'Core' #####
 echo "Renaming files and directories: 'Core' -> '${CORE_NAME}'..."
-find "$TARGET_DIR" -depth -iname "*Core*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
+find "$TMP_DIR" -mindepth 1 -depth -iname "*Core*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
     new_path="$(dirname "$path")/$(basename "$path" | sed "s/Core/${CORE_NAME}/g")"
     if [ "$path" != "$new_path" ]; then
         mv "$path" "$new_path"
@@ -66,11 +78,17 @@ done
 
 ##### Replace 'Core' inside file contents (CMakeLists.txt, headers, sources) #####
 echo "Replacing 'Core' references inside files..."
-grep -rlZE --exclude-dir=.git --exclude-dir=utils --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" '\bCore\b' "$TARGET_DIR" 2>/dev/null \
+grep -rlZE --exclude-dir=.git --exclude-dir=utils --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" '\bCore\b' "$TMP_DIR" 2>/dev/null \
     | xargs -0 -r sed -i "s/\bCore\b/${CORE_NAME}/g"
+grep -rlZE --exclude-dir=.git --exclude-dir=utils --include="*.hpp" '\bCORE_H\b' "$TMP_DIR" 2>/dev/null \
+    | xargs -0 -r sed -i "s/\bCORE_H\b/${CORE_NAME^^}_H/g"
+
+##### Move files to the target directory #####
+mkdir -p "$TARGET_DIR"
+cp -r "$TMP_DIR"/. "$TARGET_DIR"/
 
 ##### Set basic README.md #####
-cat << EOF > README.md
+cat << EOF > "$TARGET_DIR/README.md"
 # ${PROJECT_NAME}
 
 Project ${PROJECT_NAME}, look for future update...

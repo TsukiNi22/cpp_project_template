@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 set(TARGET template)
+set(CMAKE_CXX_COMPILER clang++)
 project(${TARGET} VERSION 1.0.0 LANGUAGES CXX)
 
 # =========================
@@ -8,14 +9,13 @@ project(${TARGET} VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}) # TARGET destination
 set(CMAKE_POSITION_INDEPENDENT_CODE ON) # Moderne compilation -fPIE
 
 # =========================
 # Requirement
 # =========================
-find_package(utils 2.13.22 CONFIG REQUIRED) # Check utils dependencies existance
+find_package(utils 3.0.0 CONFIG REQUIRED) # Check utils dependencies existance
 find_package(PkgConfig REQUIRED)
 find_package(Python3 REQUIRED) # Used for the special dependencie
 find_program(CCACHE_PROGRAM ccache) # Used for cache during compilation

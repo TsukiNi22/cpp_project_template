@@ -20,17 +20,25 @@ jobs:
       image: ghcr.io/tsukini22/ci:latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          path: template
+
+      # Run the setup of the pushed commit (the raw main file can be cached/outdated)
       - name: Setup repository
         run: |
-          set -e
-          wget -qO- https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main/setup.sh | bash -s -- $PROJECT_NAME $CORE_NAME
+          set -euo pipefail
+          mv template "$RUNNER_TEMP/template" # Out of the setup directory (would be renamed too)
+          TEMPLATE_DIR="$RUNNER_TEMP/template" bash "$RUNNER_TEMP/template/setup.sh" "$PROJECT_NAME" "$CORE_NAME"
         timeout-minutes: 2
 
       - name: Cache ccache
         uses: actions/cache@v5
         with:
           path: /github/home/.cache/ccache
-          key: ccache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', 'cmake/libs/*.a', 'CMakeLists.txt') }}
+          key: ccache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', 'cmake/config/exceptions/*.json', 'CMakeLists.txt') }}
           restore-keys: |
             ccache-${{ runner.os }}-
 
@@ -47,7 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -f "./$PROJECT_NAME" ]; then
-            echo "::error title=Missing executable, file=$PROJECT_NAME::Executable '$PROJECT_NAME' not found"
+            echo "::error title=Missing executable,file=$PROJECT_NAME::Executable '$PROJECT_NAME' not found"
             exit 1
           fi
           if [ ! -x "$PROJECT_NAME" ]; then
