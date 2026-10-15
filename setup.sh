@@ -26,9 +26,19 @@ elif [[ "$#" -ne 2 ]]; then
 fi
 
 # Names used as C++ namespace / class and in sed patterns
+CPP_RESERVED="alignas alignof and and_eq asm auto bitand bitor bool break case catch char char8_t char16_t char32_t class \
+compl concept const consteval constexpr constinit const_cast continue co_await co_return co_yield decltype default delete \
+do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace \
+new noexcept not not_eq nullptr operator or or_eq private protected public register reinterpret_cast requires return short \
+signed sizeof static static_assert static_cast struct switch template this thread_local throw true try typedef typeid \
+typename union unsigned using virtual void volatile wchar_t while xor xor_eq std utils"
 for name in "$PROJECT_NAME" "$CORE_NAME"; do
     if ! [[ "$name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
         echo "Invalid name '$name': must be a valid C++ identifier ([A-Za-z_][A-Za-z0-9_]*)"
+        exit 1
+    fi
+    if [[ " $CPP_RESERVED " == *" $name "* ]]; then
+        echo "Invalid name '$name': C++ keyword or name reserved by the project (std, utils)"
         exit 1
     fi
 done
@@ -54,8 +64,8 @@ sed -i "/# Don't run on template repository/{N;d;}" "$TMP_DIR/.github/workflows/
 
 ##### Rename files/directories containing 'template' #####
 echo "Renaming files and directories: 'template' -> '${PROJECT_NAME}'..."
-find "$TMP_DIR" -mindepth 1 -depth -iname "*template*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
-    new_path="$(dirname "$path")/$(basename "$path" | sed "s/template/${PROJECT_NAME}/g")"
+find "$TMP_DIR" -mindepth 1 -depth -name "*template*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
+    new_path="$(dirname "$path")/$(basename "$path" | sed "s/\btemplate\b/${PROJECT_NAME}/g")"
     if [[ "$path" != "$new_path" ]]; then
         mv "$path" "$new_path"
     fi
@@ -69,8 +79,8 @@ sed -i "s/^PROJECT_NAME\( *\)= .*/PROJECT_NAME\1= \"${PROJECT_NAME}\"/" "$TMP_DI
 
 ##### Rename files/directories containing 'Core' #####
 echo "Renaming files and directories: 'Core' -> '${CORE_NAME}'..."
-find "$TMP_DIR" -mindepth 1 -depth -iname "*Core*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
-    new_path="$(dirname "$path")/$(basename "$path" | sed "s/Core/${CORE_NAME}/g")"
+find "$TMP_DIR" -mindepth 1 -depth -name "*Core*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
+    new_path="$(dirname "$path")/$(basename "$path" | sed "s/\bCore\b/${CORE_NAME}/g")"
     if [[ "$path" != "$new_path" ]]; then
         mv "$path" "$new_path"
     fi
