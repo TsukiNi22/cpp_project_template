@@ -9,7 +9,7 @@ TEMPLATE_DIR="${TEMPLATE_DIR:-}" # Local copy of the template used instead of th
 TARGET_DIR="."
 
 ##### Argument #####
-if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+if [[ "$#" -lt 2 ]] || [[ "$#" -gt 3 ]]; then
     echo "Usage: $SCRIPT_NAME <project_name> <core_name> [-push]"
     exit 1
 fi
@@ -18,9 +18,9 @@ CORE_NAME="$2"
 
 # Auto push on repository
 PUSH=false
-if [ "$#" -eq 3 ] && [ "${3}" = "-push" ]; then
+if [[ "$#" -eq 3 ]] && [[ "${3}" = "-push" ]]; then
     PUSH=true
-elif [ "$#" -ne 2 ]; then
+elif [[ "$#" -ne 2 ]]; then
     echo "Usage: $SCRIPT_NAME <project_name> <core_name> [-push]"
     exit 1
 fi
@@ -37,7 +37,7 @@ done
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-if [ -n "$TEMPLATE_DIR" ]; then
+if [[ -n "$TEMPLATE_DIR" ]]; then
     echo "Copying the local template ${TEMPLATE_DIR}..."
     cp -r "$TEMPLATE_DIR"/. "$TMP_DIR"/
 else
@@ -56,7 +56,7 @@ sed -i "/# Don't run on template repository/{N;d;}" "$TMP_DIR/.github/workflows/
 echo "Renaming files and directories: 'template' -> '${PROJECT_NAME}'..."
 find "$TMP_DIR" -mindepth 1 -depth -iname "*template*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
     new_path="$(dirname "$path")/$(basename "$path" | sed "s/template/${PROJECT_NAME}/g")"
-    if [ "$path" != "$new_path" ]; then
+    if [[ "$path" != "$new_path" ]]; then
         mv "$path" "$new_path"
     fi
 done
@@ -71,7 +71,7 @@ sed -i "s/^PROJECT_NAME\( *\)= .*/PROJECT_NAME\1= \"${PROJECT_NAME}\"/" "$TMP_DI
 echo "Renaming files and directories: 'Core' -> '${CORE_NAME}'..."
 find "$TMP_DIR" -mindepth 1 -depth -iname "*Core*" -not -path "*/.git/*" -not -path "*/include/utils/*" | while read -r path; do
     new_path="$(dirname "$path")/$(basename "$path" | sed "s/Core/${CORE_NAME}/g")"
-    if [ "$path" != "$new_path" ]; then
+    if [[ "$path" != "$new_path" ]]; then
         mv "$path" "$new_path"
     fi
 done
@@ -96,7 +96,7 @@ EOF
 
 ##### Commit and push #####
 cd "$TARGET_DIR"
-if [ "$PUSH" = true ]; then
+if [[ "$PUSH" = true ]]; then
     echo "Pushing changes..."
     git add .
     git commit -m "Setup c++20 project template"

@@ -1,6 +1,6 @@
 /**************************************************************\
 
- ██╗  ██╗ █████╗ ██████╗ ████████╗ █████╗ ███╗   ██╗██╗ █████╗ 
+ ██╗  ██╗ █████╗ ██████╗ ████████╗ █████╗ ███╗   ██╗██╗ █████╗
  ╚██╗██╔╝██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗████╗  ██║██║██╔══██╗
   ╚███╔╝ ███████║██████╔╝   ██║   ███████║██╔██╗ ██║██║███████║
   ██╔██╗ ██╔══██║██╔══██╗   ██║   ██╔══██║██║╚██╗██║██║██╔══██║
@@ -32,7 +32,7 @@ _nodiscard static std::optional<std::string> VerboseParsingHook(const std::strin
     return "Invalid verbose level, should be (none|basic|advanced|debug), but got: " + option;
 }
 
-void template::Core::init(const int argc, const char *const argv[])
+void template::Core::init(const int argc, const char* const argv[])
 {
     utils::arguments::ArgParser parser = utils::arguments::ArgParser("template", "...");
 
