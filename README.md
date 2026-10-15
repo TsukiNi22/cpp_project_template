@@ -24,7 +24,7 @@ Build requirements:
 | ---- | ------- | -------------- | --------------------- |
 | `clang++` / `cmake` | C++20 / `>= 3.20` | `clang cmake` | `clang cmake` |
 | `python3` | `>= 3.8` | `python3` | `python3` |
-| `libutils` | `>= 3.0.0` | `libutils` | `libutils` |
+| `libutils` | `4.x` (`>= 4.0.0`) | `libutils` | `libutils` |
 | `ccache` **[OPTIONAL]** | any | `ccache` | `ccache` |
 
 > [!TIP]
@@ -103,4 +103,4 @@ cmake --build $BUILD_DIR --target get_unregistered_files  # .cpp files missing f
 - The workflow `CI - Executables` runs on every push on `main` of a generated project (skipped on the template repository): it builds the project and checks the executables listed in `EXECUTABLES`
 
 > [!NOTE]
-> Both workflows run on the runner set by the repository variable `RUNNER`, inside the `ghcr.io/tsukini22/ci:latest` container (which must provide libutils `>= 3.0.0`).
+> Both workflows run on the runner set by the repository variable `RUNNER`, inside the `ghcr.io/tsukini22/ci:latest` container (which must provide libutils `4.x`, `>= 4.0.0`).

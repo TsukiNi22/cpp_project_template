@@ -15,7 +15,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON) # Moderne compilation -fPIE
 # =========================
 # Requirement
 # =========================
-find_package(utils 3.0.0 CONFIG REQUIRED) # Check utils dependencies existance
+find_package(utils 4.0.0 CONFIG REQUIRED) # Check utils dependencies existance
 find_package(PkgConfig REQUIRED)
 find_package(Python3 REQUIRED) # Used for the special dependencie
 find_program(CCACHE_PROGRAM ccache) # Used for cache during compilation
