@@ -93,13 +93,13 @@ add_compile_options(
 # Sources
 # =========================
 # Executable only (never in the library)
-set(SRC_MAIN
+set(SRC
     # Entry
     src/template/main.cpp
 )
 
-# Shared by the executable and the library
-set(SRC
+# Shared by the executable and the library (the <name>_lib target when both exist)
+set(SRC_SHARED
     # Entry
     src/template/Core-init.cpp
 
@@ -110,9 +110,9 @@ set(SRC
 # Library: compiled (.a / .so), or INTERFACE when only the headers are shipped (header-only)
 if(TEMPLATE_PACKAGE_LIB)
     if(TEMPLATE_SHARED_LIB)
-        add_library(${TARGET_LIB} SHARED ${SRC})
+        add_library(${TARGET_LIB} SHARED ${SRC_SHARED})
     else()
-        add_library(${TARGET_LIB} STATIC ${SRC})
+        add_library(${TARGET_LIB} STATIC ${SRC_SHARED})
     endif()
 elseif(NOT TEMPLATE_PACKAGE_BIN)
     add_library(${TARGET_LIB} INTERFACE)
@@ -121,9 +121,9 @@ endif()
 # Executable: linked on the library when it exists, else built from the same sources
 if(TEMPLATE_PACKAGE_BIN)
     if(TEMPLATE_PACKAGE_LIB)
-        add_executable(${TARGET} ${SRC_MAIN})
+        add_executable(${TARGET} ${SRC})
     else()
-        add_executable(${TARGET} ${SRC_MAIN} ${SRC})
+        add_executable(${TARGET} ${SRC} ${SRC_SHARED})
     endif()
 endif()
 
@@ -357,6 +357,7 @@ if(TEMPLATE_PACKAGE_DEV)
         )
 
         # Not SECURE!!!!!!!!!! Depends on the 'CMakeFiles/Export' path (one config file per variant: -dev-db, -dev-as, -dev-op)
+        # Fuck EXPORT, Fuck Export/<hash>/, Fuck!!!!!!
         set(EXPORT_PATH "CMakeFiles/Export")
         if(TEMPLATE_DEV_PACKAGE)
             # main-headers
@@ -420,7 +421,7 @@ endif()
 # Utils
 # =========================
 add_custom_target(get_unregistered_files
-    COMMAND bash ${CMAKE_SOURCE_DIR}/cmake/scripts/check_files.sh unregistered ${SRC_MAIN} ${SRC}
+    COMMAND bash ${CMAKE_SOURCE_DIR}/cmake/scripts/check_files.sh unregistered ${SRC} ${SRC_SHARED}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 

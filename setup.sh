@@ -157,7 +157,6 @@ rm -rf "$TMP_DIR/.git"
 # Remove file & content that are only here for the template repository
 rm -f "$TMP_DIR/$SCRIPT_NAME" "$TMP_DIR/scripts.zip" # Remove this script
 rm -f "$TMP_DIR/.github/workflows/setup.yml" # Check of the script execution
-rm -f "$TMP_DIR/CHANGELOG.md" # History of the template (a new one is written below)
 sed -i "/# Don't run on template repository/{N;d;}" "$TMP_DIR/.github/workflows/dispatch.yml" "$TMP_DIR/.github/workflows/docs.yml" # Remove start condition
 
 # Project kind: default of the CMake options and content checked by the workflows
@@ -349,7 +348,7 @@ for path in glob.glob(f"{docs}/*.html"):
 EOF
 
 ##### README.md & CHANGELOG.md #####
-echo "Writing README.md and CHANGELOG.md..."
+echo "Writing README.md and filling CHANGELOG.md..."
 write_readme() {
     local lib="lib$LIB_NAME" repo_url="https://github.com/$GITHUB_REPO"
     {
@@ -557,7 +556,7 @@ cmake -S . -B \$BUILD_DIR -DCMAKE_BUILD_TYPE=Asan          # AddressSanitizer bu
 cmake --build \$BUILD_DIR --target release                 # Debug, Asan & Optimized builds
 cmake --build \$BUILD_DIR --target install_release         # Install the three variants
 cmake --build \$BUILD_DIR --target package_release         # RPM / DEB packages of every variant (build/*.rpm, *.deb)
-cmake --build \$BUILD_DIR --target get_unregistered_files  # .cpp files missing from the SRC list
+cmake --build \$BUILD_DIR --target get_unregistered_files  # .cpp files missing from the SRC / SRC_SHARED lists
 EOF
         if [[ "$KIND" == "binary" ]]; then
             cat << EOF
@@ -597,7 +596,7 @@ EOF
 | \`include/exception/generated_external_exception_header.hpp\` | Generated at build time from the JSON files (not committed) |
 
 > [!NOTE]
-> Every new \`.cpp\` must be added to the \`SRC\` list of the \`CMakeLists.txt\` (\`get_unregistered_files\` lists the missing ones).
+> Every new \`.cpp\` must be added to the \`SRC\` (executable only) or \`SRC_SHARED\` (executable and library) list of the \`CMakeLists.txt\` (\`get_unregistered_files\` lists the missing ones).
 
 ## Windows (cross compilation)
 > Build for Windows (x86_64) from Linux with the MinGW-w64 toolchain (libutils: \`mingw64-libutils\` packages in the MinGW sysroot)
@@ -676,35 +675,8 @@ EOF
 }
 write_readme
 
-cat << EOF > "$TMP_DIR/CHANGELOG.md"
-# Changelog
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-| Scope | Content |
-| ----- | ------- |
-| \`In Progress\` | Work that hasn't been completed yet (typically listed under [pre-release]) |
-| \`Added\`       | New features, files, or sections introduced in this release |
-| \`Removed\`     | Existing features, files, or sections that have been deleted |
-| \`Changed\`     | Existing features or sections that were modified (behavior, structure, or content) |
-| \`Fixed\`       | Bugs or issues that have been resolved |
-
-> [!NOTE]
-> The \`(unofficial)\` version are sub-versions (typically fixes) that don't have associated tag.
-> A package built at this version is not guaranteed!
-
----
-
-## [pre-release] (empty)
-
-## v1.0.0 - ${TODAY}
-### Added
-- First version of \`${PROJECT_NAME}\` (${KIND}), set up from [cpp_project_template](https://github.com/TsukiNi22/cpp_project_template)
-
-[v1.0.0]: https://github.com/${GITHUB_REPO}/releases/tag/v1.0.0
-EOF
+# CHANGELOG.md: the template of the first entry (project, kind, date, repository)
+sed -i "s/\btemplate\b/${PROJECT_NAME}/g; s/<kind>/${KIND}/; s/YYYY-MM-DD/${TODAY}/; s|TsukiNi22/${PROJECT_NAME}\b|${GITHUB_REPO}|g" "$TMP_DIR/CHANGELOG.md"
 
 ##### Move files to the target directory #####
 mkdir -p "$TARGET_DIR"

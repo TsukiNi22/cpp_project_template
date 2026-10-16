@@ -28,10 +28,10 @@ endif()
 # =========================
 # Sources
 # =========================
-# Project sources: the library target when it exists, else the parent list (without the entry point)
+# Project sources: the library target when it exists, else the shared list of the parent (never its entry point)
 set(SRC_PROJECT "")
 if(NOT TEMPLATE_PACKAGE_LIB)
-    set(SRC_PROJECT ${SRC})
+    set(SRC_PROJECT ${SRC_SHARED})
     list(TRANSFORM SRC_PROJECT PREPEND ${CMAKE_SOURCE_DIR}/)
 endif()
 
