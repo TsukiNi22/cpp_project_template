@@ -49,7 +49,7 @@ Build requirements:
 2. Asks the project kind and the `gh-pages` question in the terminal when they are not given as flags (defaults: `binary`, no `gh-pages`, also without a terminal)
 3. Removes the template only files (`setup.sh`, `.github/workflows/setup.yml`, `gh-pages/`) and adapts the copy to the kind (`TEMPLATE_KIND` of the CMake, `PACKAGE_*` of the workflows, no `main.cpp` for a library, no `src/` for a header-only library)
 4. Renames every file or directory containing a placeholder (ex: `src/template/Core.cpp` -> `src/my_project/App.cpp`) and replaces every placeholder inside the sources, headers, CMake files, workflows, scripts, `.gitignore` and the `Doxyfile` (`template`, `TEMPLATE_`, `Core`, `CORE_H`, the repository `TsukiNi22/<project_name>` from the `origin` remote or `GITHUB_REPO`)
-5. Writes the `README.md` (dependencies, packages, setup, usage, workflows of the project), fills the `CHANGELOG.md` template (`v1.0.0`, kind, date, repository) and the documentation `docs/` (technical page placeholder, project graph pointing at the new repository)
+5. Writes the `README.md` (dependencies, packages, setup, usage, workflows of the project), the `CHANGELOG.md` (first entry `v1.0.0`: kind, date, repository; the template repository has no changelog of its own) and the documentation `docs/` (technical page placeholder, project graph pointing at the new repository)
 6. With `gh-pages`: keeps the package repository setup script as `setup.sh`, the `docs.yml` workflow and the publication job of `build-packages.yml`, and creates the `gh-pages` branch (never touching the working tree) with the packages repository seed (`<project_name>.repo`, `RPM-GPG-KEY-tsukini`, `Sync Packages (CD)` workflow), the documentation (`docs/`) and the root `index.html` redirecting to it. Without: no publication, the packages stay as artifacts of the workflow runs
 7. With `--push`: commits and pushes the result (`chore: setup c++20 project from cpp_project_template`)
 
@@ -91,7 +91,7 @@ curl -fsSL https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main
 | `docs/` | HTML documentation: `index.html` (technical page, placeholder "coming soon"), `graph.html` (interactive project graph, refreshed from the repository), `logo.svg` |
 | `.github/workflows/` | `dispatch.yml`, `unit-tests.yml`, `build.yml`, `build-packages.yml`, `release.yml`, `docs.yml` (see [Workflows](#workflowsrelease)) |
 | `setup.sh` (gh-pages only) | Package repository setup of the project (mirror + GPG key + install, `--pre`, `--windows`, `--no-install`, `--no-sudo`), from `install.sh` of the template |
-| `README.md`, `CHANGELOG.md` (filled from the template one), `LICENSE` (MIT), `Makefile`, `Doxyfile`, `.gitignore` | Project files |
+| `README.md`, `CHANGELOG.md` (both written by `setup.sh`), `LICENSE` (MIT), `Makefile`, `Doxyfile`, `.gitignore` | Project files |
 
 ### CMake options
 
