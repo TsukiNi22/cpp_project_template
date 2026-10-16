@@ -301,6 +301,16 @@ html, body { overscroll-behavior: none; }
 :root[data-theme="dark"] .top-actions .theme-switch { border-color: var(--border); box-shadow: none; }
 :root[data-theme="dark"] .top-actions .theme-switch .knob { transform: translateX(26px); }
 @media (max-width: 480px) { .top-actions .divider { display: none; } }
+/* Placeholder page: single column, one "coming soon" panel */
+.layout { grid-template-columns: minmax(0, 1fr); max-width: 880px; }
+.menu-btn { display: none !important; }
+.soon { margin: 8px 0 40px; padding: 48px 32px; border: 3px solid var(--warn); border-radius: 10px; background: var(--warn-soft); text-align: center; }
+.soon .face { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 72px; line-height: 1; font-weight: 700; color: var(--warn); margin: 0 0 20px; letter-spacing: .04em; }
+.soon h2 { font-size: 34px; margin: 0 0 12px; color: var(--warn); }
+.soon p { margin: 0 0 8px; font-size: 17px; max-width: none; }
+.soon p.links { margin-top: 20px; }
+.soon a { font-weight: 600; }
+@media (max-width: 480px) { .soon { padding: 32px 16px; } .soon .face { font-size: 52px; } .soon h2 { font-size: 27px; } }
 </style>
 </head>
 <body>
@@ -331,55 +341,17 @@ html, body { overscroll-behavior: none; }
   </div>
 </header>
 <div class="layout">
-<aside class="sidebar" id="sidebar" aria-label="Contents" data-i18n-aria-label>
-  <p data-i18n>Contents</p>
-  <a href="#overview"><span data-lang="en">1. Overview</span><span data-lang="fr">1. Vue d'ensemble</span></a>
-  <a href="#architecture"><span data-lang="en">2. Architecture</span><span data-lang="fr">2. Architecture</span></a>
-  <a href="#modules"><span data-lang="en">3. Modules</span><span data-lang="fr">3. Modules</span></a>
-  <a href="#build"><span data-lang="en">4. Build & packages</span><span data-lang="fr">4. Build & paquets</span></a>
-  <a href="#workflows"><span data-lang="en">5. Workflows</span><span data-lang="fr">5. Workflows</span></a>
-</aside>
-
 <main>
 <header>
   <div class="page-eyebrow" data-i18n>Technical documentation</div>
   <h1><span data-lang="en">Technical documentation</span><span data-lang="fr">Documentation technique</span></h1>
-  <p class="lead"><span data-lang="en">How the project is built and works: architecture, modules, build, packages and workflows. This documentation is not written yet, every section below is a placeholder.</span><span data-lang="fr">Comment le projet est construit et fonctionne : architecture, modules, build, paquets et workflows. Cette documentation n'est pas encore écrite, chaque section ci-dessous est un emplacement réservé.</span></p>
 </header>
 
-<!-- 1 -->
-<section id="overview">
-  <h2><span data-lang="en">1. Overview</span><span data-lang="fr">1. Vue d'ensemble</span></h2>
-  <p><span data-lang="en">What the project does, for whom, and its main entry points.</span><span data-lang="fr">Ce que fait le projet, pour qui, et ses points d'entrée principaux.</span></p>
-  <div class="callout warn"><p><span data-lang="en"><strong>Coming soon</strong> - this section is not written yet. The interactive <a href="graph.html">project graph</a> already shows the files, classes and relations of the sources.</span><span data-lang="fr"><strong>Bientôt disponible</strong> - cette section n'est pas encore écrite. Le <a href="graph.html">graphe du projet</a> interactif montre déjà les fichiers, classes et relations des sources.</span></p></div>
-</section>
-
-<!-- 2 -->
-<section id="architecture">
-  <h2><span data-lang="en">2. Architecture</span><span data-lang="fr">2. Architecture</span></h2>
-  <p><span data-lang="en">The layers of the project and how they talk to each other (diagram).</span><span data-lang="fr">Les couches du projet et la façon dont elles communiquent (schéma).</span></p>
-  <div class="callout warn"><p><span data-lang="en"><strong>Coming soon</strong> - this section is not written yet. The interactive <a href="graph.html">project graph</a> already shows the files, classes and relations of the sources.</span><span data-lang="fr"><strong>Bientôt disponible</strong> - cette section n'est pas encore écrite. Le <a href="graph.html">graphe du projet</a> interactif montre déjà les fichiers, classes et relations des sources.</span></p></div>
-</section>
-
-<!-- 3 -->
-<section id="modules">
-  <h2><span data-lang="en">3. Modules</span><span data-lang="fr">3. Modules</span></h2>
-  <p><span data-lang="en">One sub-part per module: role, public classes, errors.</span><span data-lang="fr">Une sous-partie par module : rôle, classes publiques, erreurs.</span></p>
-  <div class="callout warn"><p><span data-lang="en"><strong>Coming soon</strong> - this section is not written yet. The interactive <a href="graph.html">project graph</a> already shows the files, classes and relations of the sources.</span><span data-lang="fr"><strong>Bientôt disponible</strong> - cette section n'est pas encore écrite. Le <a href="graph.html">graphe du projet</a> interactif montre déjà les fichiers, classes et relations des sources.</span></p></div>
-</section>
-
-<!-- 4 -->
-<section id="build">
-  <h2><span data-lang="en">4. Build & packages</span><span data-lang="fr">4. Build & paquets</span></h2>
-  <p><span data-lang="en">Build modes, CMake options, the package matrix (Linux, Windows) and the installation.</span><span data-lang="fr">Modes de build, options CMake, la matrice des paquets (Linux, Windows) et l'installation.</span></p>
-  <div class="callout warn"><p><span data-lang="en"><strong>Coming soon</strong> - this section is not written yet. The interactive <a href="graph.html">project graph</a> already shows the files, classes and relations of the sources.</span><span data-lang="fr"><strong>Bientôt disponible</strong> - cette section n'est pas encore écrite. Le <a href="graph.html">graphe du projet</a> interactif montre déjà les fichiers, classes et relations des sources.</span></p></div>
-</section>
-
-<!-- 5 -->
-<section id="workflows">
-  <h2><span data-lang="en">5. Workflows</span><span data-lang="fr">5. Workflows</span></h2>
-  <p><span data-lang="en">The CI/CD chain: dispatch, tests, builds, packages, releases and the documentation.</span><span data-lang="fr">La chaîne CI/CD : dispatch, tests, builds, paquets, releases et la documentation.</span></p>
-  <div class="callout warn"><p><span data-lang="en"><strong>Coming soon</strong> - this section is not written yet. The interactive <a href="graph.html">project graph</a> already shows the files, classes and relations of the sources.</span><span data-lang="fr"><strong>Bientôt disponible</strong> - cette section n'est pas encore écrite. Le <a href="graph.html">graphe du projet</a> interactif montre déjà les fichiers, classes et relations des sources.</span></p></div>
+<section class="soon" aria-labelledby="soon-title">
+  <p class="face" aria-hidden="true">&gt;_&lt;</p>
+  <h2 id="soon-title"><span data-lang="en">Coming soon</span><span data-lang="fr">Bientôt disponible</span></h2>
+  <p><span data-lang="en">The technical documentation of this project is not written yet.</span><span data-lang="fr">La documentation technique de ce projet n'est pas encore écrite.</span></p>
+  <p class="links"><span data-lang="en">Meanwhile, the interactive <a href="graph.html">project graph</a> shows the files, classes and relations of the sources.</span><span data-lang="fr">En attendant, le <a href="graph.html">graphe du projet</a> interactif montre les fichiers, classes et relations des sources.</span></p>
 </section>
 
 <nav class="pager" aria-label="Pages">
