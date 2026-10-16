@@ -6,18 +6,23 @@ on:
 
 env:
   # Names for testing purpose only
-  PROJECT_NAME: "testing"
-  CORE_NAME: "Test"
+  PROJECT_NAME: "sample"
+  CORE_NAME: "App"
 
 jobs:
   setup-template:
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [binary, library, header-only]
+
     runs-on: ${{ vars.RUNNER }}
     defaults:
       run:
         shell: bash
 
     container:
-      image: ghcr.io/tsukini22/ci:latest
+      image: ghcr.io/tsukini22/unit-tests:latest
 
     steps:
       - name: Checkout repository
@@ -27,39 +32,163 @@ jobs:
           path: template
 
       # Run the setup of the pushed commit (the raw main file can be cached/outdated)
-      - name: Setup repository
+      - name: Setup repository (${{ matrix.kind }})
         run: |
           set -euo pipefail
           mv template "$RUNNER_TEMP/template" # Out of the setup directory (would be renamed too)
-          TEMPLATE_DIR="$RUNNER_TEMP/template" bash "$RUNNER_TEMP/template/setup.sh" "$PROJECT_NAME" "$CORE_NAME"
+          git init -q -b main
+          TEMPLATE_DIR="$RUNNER_TEMP/template" bash "$RUNNER_TEMP/template/setup.sh" "$PROJECT_NAME" "$CORE_NAME" --kind "${{ matrix.kind }}" --gh-pages
+        timeout-minutes: 2
+
+      - name: Check the result
+        run: |
+          set -euo pipefail
+          if grep -rnE --exclude-dir=.git "\{\{[A-Z_]+\}\}" . > /dev/null; then
+            echo "::error title=Placeholder left::'{{...}}' found in the generated project"
+            grep -rnE --exclude-dir=.git "\{\{[A-Z_]+\}\}" . | head
+            exit 1
+          fi
+          if grep -rnw --exclude-dir=.git --exclude-dir=docs --exclude=README.md --exclude=CHANGELOG.md --exclude=Doxyfile "template" . | grep -v "cpp_project_template" > /dev/null; then
+            echo "::error title=Placeholder left::'template' found in the generated project"
+            grep -rnw --exclude-dir=.git --exclude-dir=docs --exclude=README.md --exclude=CHANGELOG.md --exclude=Doxyfile "template" . | grep -v "cpp_project_template" | head
+            exit 1
+          fi
+          if grep -rn --exclude-dir=.git --exclude-dir=docs "TEMPLATE_" . > /dev/null; then
+            echo "::error title=Placeholder left::'TEMPLATE_' found in the generated project"
+            exit 1
+          fi
+          for file in README.md CHANGELOG.md setup.sh docs/index.html docs/graph.html .github/workflows/dispatch.yml .github/workflows/docs.yml; do
+            if [ ! -f "$file" ]; then
+              echo "::error title=Missing file,file=$file::'$file' not generated"
+              exit 1
+            fi
+          done
+          if ! git show-ref --verify --quiet refs/heads/gh-pages; then
+            echo "::error title=Missing branch::gh-pages branch not created"
+            exit 1
+          fi
+          for file in .github/workflows/sync-packages.yml $PROJECT_NAME.repo RPM-GPG-KEY-tsukini index.html .nojekyll docs/index.html docs/graph.html; do
+            if ! git cat-file -e "gh-pages:$file" 2> /dev/null; then
+              echo "::error title=Missing file,file=$file::'$file' not on the gh-pages branch"
+              exit 1
+            fi
+          done
+          grep -q "$PROJECT_NAME.repo\|baseurl=.*$PROJECT_NAME" <(git show "gh-pages:$PROJECT_NAME.repo")
+          echo "✓ generated project ok (${{ matrix.kind }}, gh-pages)"
+
+      - name: Cache ccache
+        uses: actions/cache@v5
+        with:
+          path: /github/home/.cache/ccache
+          key: ccache-${{ matrix.kind }}-${{ hashFiles('**/*.cpp', '**/*.hpp', 'cmake/config/exceptions/*.json', 'CMakeLists.txt') }}
+          restore-keys: |
+            ccache-${{ matrix.kind }}-
+
+      - name: Build (release target) and unit tests
+        run: |
+          set -euo pipefail
+          cmake -S . -B build -DBUILD_TESTS=ON
+          cmake --build build --target release --parallel $(nproc)
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
+          cmake --build build --parallel $(nproc)
+          (cd build && ctest --output-on-failure --timeout 30)
+        timeout-minutes: 6
+
+      - name: Build packages
+        run: |
+          set -euo pipefail
+          cmake -S . -B build-packages -DPACKAGE_RELEASE=${{ github.run_number }}
+          cmake --build build-packages --target package_release --parallel $(nproc)
+        timeout-minutes: 6
+
+      - name: Show ccache stats
+        run: ccache -s
+
+      - name: Check outputs
+        run: |
+          set -euo pipefail
+          case "${{ matrix.kind }}" in
+            binary)
+              [ -x "./$PROJECT_NAME" ] || { echo "::error title=Missing executable::'$PROJECT_NAME' not found"; exit 1; }
+              ./$PROJECT_NAME --help > /dev/null
+              expected="$PROJECT_NAME-op-*-bin.rpm $PROJECT_NAME-db-*-bin.deb $PROJECT_NAME-pre-*-Linux.rpm"
+              ;;
+            library)
+              for lib in lib$PROJECT_NAME.a lib${PROJECT_NAME}_debug.a lib${PROJECT_NAME}_asan.a; do
+                [ -f "build/$lib" ] || { echo "::error title=Missing library::'$lib' not found"; exit 1; }
+              done
+              expected="lib$PROJECT_NAME-op-*-lib.rpm lib$PROJECT_NAME-dev-*-headers.deb lib$PROJECT_NAME-dev-*-headers-as.rpm lib$PROJECT_NAME-pre-*-Linux.rpm"
+              ;;
+            header-only)
+              expected="lib$PROJECT_NAME-dev-*-headers.rpm lib$PROJECT_NAME-dev-*-headers.deb lib$PROJECT_NAME-pre-*-Linux.rpm"
+              ;;
+          esac
+          for pattern in $expected; do
+            if [ -z "$(find build-packages -maxdepth 1 -name "$pattern" -print -quit)" ]; then
+              echo "::error title=Missing package::no package matching '$pattern'"
+              ls build-packages/*.rpm build-packages/*.deb
+              exit 1
+            fi
+            echo "✓ package '$pattern' ok"
+          done
+          [ -f "./unit_tests" ] || { echo "::error title=Missing binary::unit_tests not found"; exit 1; }
+          echo "✓ ${{ matrix.kind }} project ok"
+
+  setup-template-windows:
+    runs-on: ${{ vars.RUNNER }}
+    defaults:
+      run:
+        shell: bash
+
+    container:
+      image: ghcr.io/tsukini22/mingw64-ci:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          path: template
+
+      - name: Setup repository (binary, no gh-pages)
+        run: |
+          set -euo pipefail
+          mv template "$RUNNER_TEMP/template"
+          TEMPLATE_DIR="$RUNNER_TEMP/template" bash "$RUNNER_TEMP/template/setup.sh" "$PROJECT_NAME" "$CORE_NAME" --kind binary --no-gh-pages
+          if [ -f .github/workflows/docs.yml ] || grep -q "sync-online-packages" .github/workflows/build-packages.yml; then
+            echo "::error title=gh-pages left::gh-pages workflows kept without --gh-pages"
+            exit 1
+          fi
+          echo "✓ generated project ok (binary, no gh-pages)"
         timeout-minutes: 2
 
       - name: Cache ccache
         uses: actions/cache@v5
         with:
           path: /github/home/.cache/ccache
-          key: ccache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', 'cmake/config/exceptions/*.json', 'CMakeLists.txt') }}
+          key: ccache-mingw64-${{ hashFiles('**/*.cpp', '**/*.hpp', 'cmake/config/exceptions/*.json', 'CMakeLists.txt') }}
           restore-keys: |
-            ccache-${{ runner.os }}-
+            ccache-mingw64-
 
-      - name: Build executables
+      - name: Build packages (MinGW-w64)
         run: |
-          set -e
-          make re
-        timeout-minutes: 2
+          set -euo pipefail
+          cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/mingw-w64.cmake -DPACKAGE_RELEASE=${{ github.run_number }}
+          cmake --build build --target package_release --parallel $(nproc)
+        timeout-minutes: 8
 
       - name: Show ccache stats
         run: ccache -s
 
-      - name: Check executables
+      - name: Check outputs
         run: |
           set -euo pipefail
-          if [ ! -f "./$PROJECT_NAME" ]; then
-            echo "::error title=Missing executable,file=$PROJECT_NAME::Executable '$PROJECT_NAME' not found"
-            exit 1
-          fi
-          if [ ! -x "$PROJECT_NAME" ]; then
-            echo "::error title=Permission error,file=$PROJECT_NAME::Executable '$PROJECT_NAME' has no execution permission"
-            exit 1
-          fi
-          echo "✓ Executable '$PROJECT_NAME' ok"
+          [ -f "./$PROJECT_NAME.exe" ] || { echo "::error title=Missing executable::'$PROJECT_NAME.exe' not found"; exit 1; }
+          for pattern in "mingw64-$PROJECT_NAME-op-*-win64-bin.rpm" "mingw64-$PROJECT_NAME-db-*-win64-bin.deb" "mingw64-$PROJECT_NAME-pre-*-win64.rpm"; do
+            if [ -z "$(find build -maxdepth 1 -name "$pattern" -print -quit)" ]; then
+              echo "::error title=Missing package::no package matching '$pattern'"
+              exit 1
+            fi
+            echo "✓ package '$pattern' ok"
+          done
+          echo "✓ windows project ok"

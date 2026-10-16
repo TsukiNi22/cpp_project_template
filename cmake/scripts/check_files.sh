@@ -14,7 +14,7 @@ registered=$(printf '%s\n' "${files[@]}") # one path per line
 # Execution
 if [[ "$mode" = "unregistered" ]]; then
     echo -e "╔═════ 🔻 [${CYAN}Unregistered Files${RESET}] 🔻 ═════╗"
-    find src -name "*.cpp" -printf "src/%P\n" | while read -r file; do
+    [[ -d src ]] && find src -name "*.cpp" -printf "src/%P\n" | while read -r file; do
         grep -qxF "$file" <<< "$registered" || echo "$file"
     done
     echo -e "╚═════ 🔺 [${CYAN}Unregistered Files${RESET}] 🔺 ═════╝"

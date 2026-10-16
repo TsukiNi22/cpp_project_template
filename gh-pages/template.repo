@@ -1,0 +1,6 @@
+[template]
+name=template repository
+baseurl=https://tsukini22.github.io/template/fedora/$releasever/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://tsukini22.github.io/template/RPM-GPG-KEY-tsukini

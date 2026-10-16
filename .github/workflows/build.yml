@@ -1,17 +1,16 @@
-name: CI - Executables
+name: Build (CI)
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch: # Triggered by Dispatch (CI/CD)
 
 env:
-  EXECUTABLES: "template"
+  # Content of the project (the TEMPLATE_PACKAGE_BIN / TEMPLATE_PACKAGE_LIB options of the CMakeLists.txt)
+  NAME: "template"
+  PACKAGE_BIN: "ON"
+  PACKAGE_LIB: "OFF"
 
 jobs:
-  build-executables:
-    # Don't run on template repository
-    if: github.repository != 'TsukiNi22/cpp_project_template'
-
+  build:
     runs-on: ${{ vars.RUNNER }}
     defaults:
       run:
@@ -34,26 +33,87 @@ jobs:
           restore-keys: |
             ccache-${{ runner.os }}-
 
-      - name: Build executables
+      - name: Build (Release)
         run: |
           set -e
-          make re
-        timeout-minutes: 2
+          cmake -S . -B build
+          cmake --build build --target release --parallel $(nproc)
+        timeout-minutes: 6
 
       - name: Show ccache stats
         run: ccache -s
 
-      - name: Check executables
+      - name: Check outputs
         run: |
           set -euo pipefail
-          for executable in $(echo $EXECUTABLES | tr ',' ' ' | xargs); do
-            if [ ! -f "./$executable" ]; then
-              echo "::error title=Missing executable,file=$executable::Executable '$executable' not found"
+          if [ "$PACKAGE_BIN" = "ON" ]; then
+            if [ ! -x "./$NAME" ]; then
+              echo "::error title=Missing executable,file=$NAME::Executable '$NAME' not found at repo root (or not executable)"
               exit 1
             fi
-            if [ ! -x "$executable" ]; then
-              echo "::error title=Permission error,file=$executable::Executable '$executable' has no execution permission"
+            echo "✓ Executable '$NAME' ok"
+          fi
+          if [ "$PACKAGE_LIB" = "ON" ]; then
+            for suffix in "" _debug _asan; do
+              library="lib${NAME#lib}${suffix}"
+              if ! compgen -G "./build/$library.*" > /dev/null; then
+                echo "::error title=Missing library,file=$library::Library '$library' not found in build/"
+                exit 1
+              fi
+              echo "✓ Library '$library' ok"
+            done
+          fi
+
+  build-windows:
+    runs-on: ${{ vars.RUNNER }}
+    defaults:
+      run:
+        shell: bash
+
+    container:
+      image: ghcr.io/tsukini22/mingw64-ci:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Cache ccache
+        uses: actions/cache@v5
+        with:
+          path: /github/home/.cache/ccache
+          key: ccache-mingw64-${{ hashFiles('**/*.cpp', '**/*.hpp', 'cmake/config/exceptions/*.json', 'CMakeLists.txt') }}
+          restore-keys: |
+            ccache-mingw64-
+
+      - name: Build (Release, MinGW-w64)
+        run: |
+          set -e
+          cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/mingw-w64.cmake
+          cmake --build build --target release --parallel $(nproc)
+        timeout-minutes: 8
+
+      - name: Show ccache stats
+        run: ccache -s
+
+      - name: Check outputs
+        run: |
+          set -euo pipefail
+          if [ "$PACKAGE_BIN" = "ON" ]; then
+            if [ ! -f "./$NAME.exe" ]; then
+              echo "::error title=Missing executable,file=$NAME.exe::Executable '$NAME.exe' not found at repo root"
               exit 1
             fi
-            echo "✓ Executable '$executable' ok"
-          done
+            echo "✓ Executable '$NAME.exe' ok"
+          fi
+          if [ "$PACKAGE_LIB" = "ON" ]; then
+            for suffix in "" _debug; do # no Asan with MinGW
+              library="lib${NAME#lib}${suffix}"
+              if ! compgen -G "./build/$library.*" > /dev/null; then
+                echo "::error title=Missing library,file=$library::Library '$library' not found in build/"
+                exit 1
+              fi
+              echo "✓ Library '$library' ok"
+            done
+          fi
