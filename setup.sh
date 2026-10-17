@@ -369,7 +369,7 @@ EOF
             header-only) echo "C++20 header-only library (\`find_package(${PROJECT_NAME})\`, target \`${PROJECT_NAME}::${PROJECT_NAME}\`) on top of [libutils](https://github.com/TsukiNi22/libutils)." ;;
         esac
         cat << EOF
-Generated from [cpp_project_template](https://github.com/TsukiNi22/cpp_project_template): Linux and Windows (MinGW-w64 cross compilation) builds, RPM / DEB packages and the libutils workflows.
+Generated from [cpp_project_template](https://github.com/TsukiNi22/cpp_project_template): Linux and Windows (MinGW-w64 cross compilation) builds, RPM / DEB / Arch (pacman) packages and the libutils workflows.
 
 ### Table of Contents
  - [Dependencies](#dependencies)
@@ -392,14 +392,14 @@ EOF
 | ----------- | ------ | ----------- |
 | [libutils](https://github.com/TsukiNi22/libutils) | ![CD - Dispatch](https://github.com/TsukiNi22/libutils/actions/workflows/dispatch.yml/badge.svg) | ![](https://img.shields.io/github/last-commit/TsukiNi22/libutils) |
 
-| Name | Version | Fedora (\`dnf\`) | Debian/Ubuntu (\`apt\`) |
-| ---- | ------- | -------------- | --------------------- |
-| \`clang++\` / \`cmake\` | C++20 / \`>= 3.20\` | \`clang cmake\` | \`clang cmake\` |
-| \`python3\` | \`>= 3.8\` | \`python3\` | \`python3\` |
-| \`libutils\` | \`4.x\` (\`>= 4.1.0\`) | \`libutils\` | \`libutils\` |
-| GoogleTest (tests only) | any | \`gtest-devel\` | \`libgtest-dev\` |
-| MinGW-w64 (Windows only) | GCC \`>= 13\` | \`mingw64-gcc-c++ mingw64-libutils\` | \`g++-mingw-w64-x86-64\` + libutils built for MinGW |
-| \`ccache\` **[OPTIONAL]** | any | \`ccache\` | \`ccache\` |
+| Name | Version | Fedora (\`dnf\`) | Debian/Ubuntu (\`apt\`) | Arch (\`pacman\`) |
+| ---- | ------- | -------------- | --------------------- | --------------- |
+| \`clang++\` / \`cmake\` | C++20 / \`>= 3.20\` | \`clang cmake\` | \`clang cmake\` | \`clang cmake\` |
+| \`python3\` | \`>= 3.8\` | \`python3\` | \`python3\` | \`python\` |
+| \`libutils\` | \`4.x\` (\`>= 4.1.0\`, \`>= 4.2.0\` on Arch) | \`libutils\` | \`libutils\` | \`libutils\` |
+| GoogleTest (tests only) | any | \`gtest-devel\` | \`libgtest-dev\` | \`gtest\` |
+| MinGW-w64 (Windows only) | GCC \`>= 13\` | \`mingw64-gcc-c++ mingw64-libutils\` | \`g++-mingw-w64-x86-64\` + libutils built for MinGW | — |
+| \`ccache\` **[OPTIONAL]** | any | \`ccache\` | \`ccache\` | \`ccache\` |
 
 > [!TIP]
 > libutils packages and source install: see the [libutils README](https://github.com/TsukiNi22/libutils#packages).
@@ -409,6 +409,8 @@ EOF
 > [!NOTE]
 > Every package has a pre-release/unstable version named \`<package_name>-pre\`.
 > The \`-pre\` packages are marked as obsolete by any release/stable package (without \`-pre\`) of the same version or higher.
+>
+> The same packages exist as RPM (Fedora), DEB (Debian/Ubuntu) and Arch Linux (pacman, \`.pkg.tar.zst\`): same names, content and dependencies (on Arch the libraries are in \`/usr/lib\`).
 
 EOF
         case "$KIND" in
@@ -511,16 +513,17 @@ EOF
 > If the error still persists, it might be due to an error in the repository.
 
 > [!WARNING]
-> Restriction: \`fedora-based (rpm)\`, \`debian-based (deb)\`
+> Restriction: \`fedora-based (rpm)\`, \`debian-based (deb)\`, \`arch-based (pacman)\`
 
 > [!NOTE]
 > The usage of \`sudo\` in the script can be removed with the \`--no-sudo\` argument.
 
 Run the setup script directly, without cloning the repository. It registers the package repository (\`gh-pages\` branch) so the system package manager can install the packages:
-1. Detect the distribution from \`/etc/os-release\` (\`rpm\` or \`deb\` based).
+1. Detect the distribution from \`/etc/os-release\` (\`rpm\`, \`deb\` or \`arch\` based).
 2. \`rpm\`: add \`/etc/yum.repos.d/${PROJECT_NAME}.repo\` and import the GPG key.
 3. \`deb\`: add the GPG key in \`/etc/apt/keyrings/${PROJECT_NAME}.gpg\`, the source in \`/etc/apt/sources.list.d/${PROJECT_NAME}.list\`, then \`apt-get update\`.
-4. Install the package \`${PACKAGE_BASE}\` (\`--pre\` for the unstable one, \`--windows\` for \`mingw64-${PACKAGE_BASE}\`).
+4. \`arch\`: add the GPG key to the pacman keyring (\`pacman-key --add\` + \`--lsign-key\`), the \`[${PROJECT_NAME}]\` repository in \`/etc/pacman.conf\` (\`SigLevel = Required\`), then \`pacman -Sy\`.
+5. Install the package \`${PACKAGE_BASE}\` (\`--pre\` for the unstable one, \`--windows\` for \`mingw64-${PACKAGE_BASE}\`, rpm / deb only).
 
 \`\`\`bash
 wget -qO- https://raw.githubusercontent.com/${GITHUB_REPO}/main/setup.sh | bash -s
@@ -536,7 +539,7 @@ curl -fsSL https://raw.githubusercontent.com/${GITHUB_REPO}/main/setup.sh | bash
 | -------- | ------ |
 | \`--no-sudo\` | Run without \`sudo\` (the script must already run as root) |
 | \`--pre\` | Install the pre-release/unstable package (\`${PACKAGE_BASE}-pre\`) |
-| \`--windows\` | Install the Windows packages (\`mingw64-${PACKAGE_BASE}\`, MinGW sysroot) |
+| \`--windows\` | Install the Windows packages (\`mingw64-${PACKAGE_BASE}\`, MinGW sysroot, rpm / deb only) |
 | \`--no-install\` | Only setup the mirror & GPG key, don't install the package |
 | \`-h\`, \`--help\` | Display the usage |
 EOF
@@ -555,7 +558,7 @@ cmake -S . -B \$BUILD_DIR -DCMAKE_BUILD_TYPE=Debug         # Debug build (-g -gg
 cmake -S . -B \$BUILD_DIR -DCMAKE_BUILD_TYPE=Asan          # AddressSanitizer build
 cmake --build \$BUILD_DIR --target release                 # Debug, Asan & Optimized builds
 cmake --build \$BUILD_DIR --target install_release         # Install the three variants
-cmake --build \$BUILD_DIR --target package_release         # RPM / DEB packages of every variant (build/*.rpm, *.deb)
+cmake --build \$BUILD_DIR --target package_release         # RPM / DEB / Arch packages of every variant (build/*.rpm, *.deb, *.pkg.tar.zst)
 cmake --build \$BUILD_DIR --target get_unregistered_files  # .cpp files missing from the SRC / SRC_SHARED lists
 EOF
         if [[ "$KIND" == "binary" ]]; then
@@ -628,14 +631,14 @@ cmake --build build --parallel \$(nproc)                       # ./unit_tests at
 EOF
         if [[ "$GH_PAGES" == true ]]; then
             cat << EOF
-- \`Build - Packages (CI/CD)\`: builds the packages (RPM/DEB: Linux in the \`ci\` image, Windows \`mingw64-*\` in the \`mingw64-ci\` image), signs them and publishes them on the \`gh-pages\` repository
+- \`Build - Packages (CI/CD)\`: builds the packages (RPM/DEB/Arch: Linux in the \`ci\` image, Windows \`mingw64-*\` in the \`mingw64-ci\` image), signs them and publishes them on the \`gh-pages\` repository
 - \`Release - GitHub (CD)\`: creates the GitHub release of a tag from its section of the \`CHANGELOG.md\`, once the packages are published
 - \`Docs - Pages (CD)\`: copies \`docs/\` on the \`gh-pages\` branch on every push changing it (${PAGES_URL}/docs/)
 - \`Sync Packages (CD)\` (on \`gh-pages\`): rebuilds the metadata and signatures of the package repository after a manual push on the branch
 EOF
         else
             cat << EOF
-- \`Build - Packages (CI/CD)\`: builds the packages (RPM/DEB: Linux in the \`ci\` image, Windows \`mingw64-*\` in the \`mingw64-ci\` image), kept as artifacts of the run
+- \`Build - Packages (CI/CD)\`: builds the packages (RPM/DEB/Arch: Linux in the \`ci\` image, Windows \`mingw64-*\` in the \`mingw64-ci\` image), kept as artifacts of the run
 - \`Release - GitHub (CD)\`: creates the GitHub release of a tag from its section of the \`CHANGELOG.md\`, once the packages are built
 EOF
         fi

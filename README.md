@@ -1,6 +1,6 @@
 # cpp_project_template
 
-A ready-to-use C++20 project template: CMake, `clang++`, ccache, [libutils](https://github.com/TsukiNi22/libutils), exception headers generated from JSON, GoogleTest, Linux and Windows (MinGW-w64) builds, RPM / DEB packages with the libutils naming and the libutils workflows (dispatch, unit tests, packages, GitHub release, `gh-pages` repository and documentation).
+A ready-to-use C++20 project template: CMake, `clang++`, ccache, [libutils](https://github.com/TsukiNi22/libutils), exception headers generated from JSON, GoogleTest, Linux and Windows (MinGW-w64) builds, RPM / DEB / Arch (pacman) packages with the libutils naming and the libutils workflows (dispatch, unit tests, packages, GitHub release, `gh-pages` repository and documentation).
 The `setup.sh` script downloads it, renames the placeholders (`template` and `Core`) to your project name and core class name, adapts it to the project kind (binary, library, header-only), writes the README / CHANGELOG / documentation, optionally creates the `gh-pages` branch, and can commit/push the result.
 
 ### Table of Contents
@@ -22,15 +22,15 @@ The `setup.sh` script downloads it, renames the placeholders (`template` and `Co
 
 Build requirements:
 
-| Name | Version | Fedora (`dnf`) | Debian/Ubuntu (`apt`) |
-| ---- | ------- | -------------- | --------------------- |
-| `clang++` / `cmake` | C++20 / `>= 3.20` | `clang cmake` | `clang cmake` |
-| `python3` | `>= 3.8` | `python3` | `python3` |
-| `libutils` | `4.x` (`>= 4.1.0`) | `libutils` | `libutils` |
-| GoogleTest (tests only) | any | `gtest-devel` | `libgtest-dev` |
-| MinGW-w64 (Windows only) | GCC `>= 13` | `mingw64-gcc-c++ mingw64-libutils` | `g++-mingw-w64-x86-64` + libutils built for MinGW |
-| `rpm-build`, `dpkg` (packages only) | any | `rpm-build dpkg` | `rpm dpkg-dev` |
-| `ccache` **[OPTIONAL]** | any | `ccache` | `ccache` |
+| Name | Version | Fedora (`dnf`) | Debian/Ubuntu (`apt`) | Arch (`pacman`) |
+| ---- | ------- | -------------- | --------------------- | --------------- |
+| `clang++` / `cmake` | C++20 / `>= 3.20` | `clang cmake` | `clang cmake` | `clang cmake` |
+| `python3` | `>= 3.8` | `python3` | `python3` | `python` |
+| `libutils` | `4.x` (`>= 4.1.0`, `>= 4.2.0` on Arch) | `libutils` | `libutils` | `libutils` |
+| GoogleTest (tests only) | any | `gtest-devel` | `libgtest-dev` | `gtest` |
+| MinGW-w64 (Windows only) | GCC `>= 13` | `mingw64-gcc-c++ mingw64-libutils` | `g++-mingw-w64-x86-64` + libutils built for MinGW | — |
+| `rpm-build`, `dpkg`, `bsdtar` (packages only, `bsdtar` for the Arch ones) | any | `rpm-build dpkg bsdtar` | `rpm dpkg-dev libarchive-tools` | `rpm-tools dpkg libarchive` |
+| `ccache` **[OPTIONAL]** | any | `ccache` | `ccache` | `ccache` |
 
 > [!TIP]
 > libutils packages (Linux `libutils*`, Windows `mingw64-libutils*`) and source install: see the [libutils README](https://github.com/TsukiNi22/libutils#packages).
@@ -50,7 +50,7 @@ Build requirements:
 3. Removes the template only files (`setup.sh`, `.github/workflows/setup.yml`, `gh-pages/`) and adapts the copy to the kind (`TEMPLATE_KIND` of the CMake, `PACKAGE_*` of the workflows, no `main.cpp` for a library, no `src/` for a header-only library)
 4. Renames every file or directory containing a placeholder (ex: `src/template/Core.cpp` -> `src/my_project/App.cpp`) and replaces every placeholder inside the sources, headers, CMake files, workflows, scripts, `.gitignore` and the `Doxyfile` (`template`, `TEMPLATE_`, `Core`, `CORE_H`, the repository `TsukiNi22/<project_name>` from the `origin` remote or `GITHUB_REPO`)
 5. Writes the `README.md` (dependencies, packages, setup, usage, workflows of the project), the `CHANGELOG.md` (first entry `v1.0.0`: kind, date, repository; the template repository has no changelog of its own) and the documentation `docs/` (technical page placeholder, project graph pointing at the new repository)
-6. With `gh-pages`: keeps the package repository setup script as `setup.sh`, the `docs.yml` workflow and the publication job of `build-packages.yml`, and creates the `gh-pages` branch (never touching the working tree) with the packages repository seed (`<project_name>.repo`, `RPM-GPG-KEY-tsukini`, `Sync Packages (CD)` workflow), the documentation (`docs/`) and the root `index.html` redirecting to it. Without: no publication, the packages stay as artifacts of the workflow runs
+6. With `gh-pages`: keeps the package repository setup script as `setup.sh`, the `docs.yml` workflow and the publication job of `build-packages.yml`, and creates the `gh-pages` branch (never touching the working tree) with the packages repository seed (`<project_name>.repo`, `RPM-GPG-KEY-tsukini`, `Sync Packages (CD)` workflow; `fedora/`, `debian/` and `arch/` filled by the first publication), the documentation (`docs/`) and the root `index.html` redirecting to it. Without: no publication, the packages stay as artifacts of the workflow runs
 7. With `--push`: commits and pushes the result (`chore: setup c++20 project from cpp_project_template`)
 
 ```bash
@@ -156,7 +156,7 @@ cmake -S . -B $BUILD_DIR -DCMAKE_BUILD_TYPE=Debug         # Debug build (-g -ggd
 cmake -S . -B $BUILD_DIR -DCMAKE_BUILD_TYPE=Asan          # AddressSanitizer build
 cmake --build $BUILD_DIR --target release                 # Debug, Asan & Optimized builds
 cmake --build $BUILD_DIR --target install_release         # Install the three variants (library) / the executable
-cmake --build $BUILD_DIR --target package_release         # RPM / DEB of every variant + headers + global (build/*.rpm, *.deb)
+cmake --build $BUILD_DIR --target package_release         # RPM / DEB / Arch of every variant + headers + global (build/*.rpm, *.deb, *.pkg.tar.zst)
 cmake --build $BUILD_DIR --target get_unregistered_files  # .cpp files missing from the SRC / SRC_SHARED lists
 cmake -S . -B $BUILD_DIR -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug && cmake --build $BUILD_DIR && (cd $BUILD_DIR && ctest)
 
@@ -181,7 +181,7 @@ WINEPATH=/usr/x86_64-w64-mingw32/sys-root/mingw/bin wine ./<name>.exe --help
 - `Dispatch (CI/CD)`: runs on every push (branch `main` or tag `v*`, not for `*.md` / `*.txt` / `docs/` only changes) and decides what to trigger from the ref / commit message
 - `Unit Tests (CI)`: builds and runs the unit tests, always first (Linux in the `unit-tests` image, Windows in the `mingw64-unit-tests` image under `wine`)
 - `Build (CI)`: only builds the project (Linux in the `ci` image, Windows in the `mingw64-ci` image) and checks the outputs (executable / libraries), without producing packages
-- `Build - Packages (CI/CD)`: builds the packages (RPM/DEB: Linux in the `ci` image, Windows `mingw64-*` in the `mingw64-ci` image), checks them against the `PACKAGE_*` content, then (gh-pages only) signs and publishes them on the `gh-pages` repository (`fedora/44/x86_64`, `debian/`, 5 last `-pre` versions kept)
+- `Build - Packages (CI/CD)`: builds the packages (RPM/DEB/Arch: Linux in the `ci` image, Windows `mingw64-*` in the `mingw64-ci` image), checks them against the `PACKAGE_*` content, then (gh-pages only) signs and publishes them on the `gh-pages` repository (`fedora/44/x86_64`, `debian/`, `arch/x86_64`, 5 last `-pre` versions kept)
 - `Release - GitHub (CD)`: creates the GitHub release of a tag from its section of the `CHANGELOG.md` (`## vX.Y.Z - date` / `## [vX.Y.Z-pre] - date`), once the packages are built / published
 - `Docs - Pages (CD)` (gh-pages only): copies `docs/` on the `gh-pages` branch on every push changing it (`https://<owner>.github.io/<repo>/`)
 - `Sync Packages (CD)` (on the `gh-pages` branch): rebuilds the metadata and signatures of the package repository after a manual push on the branch (not the bot / docs commits)
