@@ -1,6 +1,6 @@
 #!/bin/bash
 # Package repository setup of template (becomes the setup.sh of a generated project): registers the gh-pages
-# mirror (RPM / DEB, signed) in the system package manager and installs the package.
+# mirror (RPM / DEB / Arch, signed) in the system package manager and installs the package.
 set -euo pipefail
 
 BASE_URL="https://tsukini22.github.io/template"
@@ -18,7 +18,7 @@ usage() {
     echo "Usage: $0 [--no-sudo] [--pre] [--windows] [--no-install]"
     echo "  --no-sudo      Run without sudo (requires the script to be run as root already)"
     echo "  --pre          Install the pre-release/unstable package (template-pre)"
-    echo "  --windows      Install the Windows packages (mingw64-template, MinGW sysroot) instead of the Linux ones"
+    echo "  --windows      Install the Windows packages (mingw64-template, MinGW sysroot) instead of the Linux ones (rpm / deb only)"
     echo "  --no-install   Only setup the mirror & gpg key, don't install the package"
     exit 1
 }
@@ -87,6 +87,10 @@ is_deb_based() {
     [[ "$OS_ID" =~ ^(debian|ubuntu)$ ]] || [[ "$OS_ID_LIKE" =~ (debian|ubuntu) ]]
 }
 
+is_arch_based() {
+    [[ "$OS_ID" =~ ^(arch|manjaro|endeavouros|cachyos)$ ]] || [[ "$OS_ID_LIKE" =~ arch ]]
+}
+
 # =========================
 # RPM
 # =========================
@@ -143,6 +147,40 @@ install_deb_package() {
 }
 
 # =========================
+# Arch (pacman)
+# =========================
+PACMAN_CONF="${PACMAN_CONF:-/etc/pacman.conf}"
+
+install_arch_repo() {
+    echo "Detected Arch-based system (ID=$OS_ID). Setting up template repo..."
+    require gpg pacman-key
+
+    local key_file key_id
+    key_file="$(mktemp)"
+    curl -fsSL -o "$key_file" "$BASE_URL/$KEY_NAME"
+
+    # Trust the signing key in the pacman keyring (packages & database are signed)
+    key_id="$(gpg --with-colons --import-options show-only --import "$key_file" | awk -F: '/^fpr:/ {print $10; exit}')"
+    $SUDO pacman-key --add "$key_file"
+    $SUDO pacman-key --lsign-key "$key_id"
+    rm -f "$key_file"
+
+    if ! grep -q '^\[template\]' "$PACMAN_CONF"; then
+        printf '\n[template]\nSigLevel = Required\nServer = %s/arch/$arch\n' "$BASE_URL" \
+            | $SUDO tee -a "$PACMAN_CONF" > /dev/null
+    fi
+
+    $SUDO pacman -Sy
+
+    echo "template repo installed."
+}
+
+install_arch_package() {
+    echo "Installing $PACKAGE..."
+    $SUDO pacman -S --noconfirm "$PACKAGE"
+}
+
+# =========================
 # Dispatch
 # =========================
 if is_rpm_based; then
@@ -151,9 +189,16 @@ if is_rpm_based; then
 elif is_deb_based; then
     install_deb_repo
     if $INSTALL; then install_deb_package; fi
+elif is_arch_based; then
+    if [[ -n "$PREFIX" ]]; then
+        echo "Error: no Windows (mingw64-) packages for Arch based distributions (no MinGW OpenSSL package)." >&2
+        exit 1
+    fi
+    install_arch_repo
+    if $INSTALL; then install_arch_package; fi
 else
     echo "Error: unsupported distribution (ID=$OS_ID, ID_LIKE=$OS_ID_LIKE)." >&2
-    echo "Supported: Fedora/RHEL-based (rpm) and Debian/Ubuntu-based (deb)." >&2
+    echo "Supported: Fedora/RHEL-based (rpm), Debian/Ubuntu-based (deb) and Arch-based (pacman)." >&2
     exit 1
 fi
 
@@ -161,6 +206,8 @@ if $INSTALL; then
     echo "$PACKAGE installed."
 elif is_rpm_based; then
     echo "You can now run: $SUDO dnf install $PACKAGE"
+elif is_arch_based; then
+    echo "You can now run: $SUDO pacman -S $PACKAGE"
 else
     echo "You can now run: $SUDO apt install $PACKAGE"
 fi
