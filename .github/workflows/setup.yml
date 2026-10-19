@@ -56,7 +56,7 @@ jobs:
             grep -rnw --exclude-dir=.git --exclude-dir=docs --exclude=README.md --exclude=CHANGELOG.md --exclude=Doxyfile "template" . | grep -v "cpp_project_template" | head
             exit 1
           fi
-          if grep -rn --exclude-dir=.git --exclude-dir=docs "TEMPLATE_" . > /dev/null; then
+          if grep -rn --exclude-dir=.git --exclude-dir=docs --exclude=Doxyfile "TEMPLATE_" . > /dev/null; then
             echo "::error title=Placeholder left::'TEMPLATE_' found in the generated project"
             exit 1
           fi
