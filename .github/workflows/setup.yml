@@ -36,6 +36,7 @@ jobs:
         run: |
           set -euo pipefail
           mv template "$RUNNER_TEMP/template" # Out of the setup directory (would be renamed too)
+          git config --global --add safe.directory "$GITHUB_WORKSPACE" # Workspace owned by another user in the container
           git init -q -b main
           TEMPLATE_DIR="$RUNNER_TEMP/template" bash "$RUNNER_TEMP/template/setup.sh" "$PROJECT_NAME" "$CORE_NAME" --kind "${{ matrix.kind }}" --gh-pages
         timeout-minutes: 2
