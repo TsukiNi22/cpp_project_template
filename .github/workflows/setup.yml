@@ -37,6 +37,8 @@ jobs:
           set -euo pipefail
           mv template "$RUNNER_TEMP/template" # Out of the setup directory (would be renamed too)
           git config --global --add safe.directory "$GITHUB_WORKSPACE" # Workspace owned by another user in the container
+          git config --global user.name "github-actions[bot]" # Needed by the gh-pages commit of setup.sh
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git init -q -b main
           TEMPLATE_DIR="$RUNNER_TEMP/template" bash "$RUNNER_TEMP/template/setup.sh" "$PROJECT_NAME" "$CORE_NAME" --kind "${{ matrix.kind }}" --gh-pages
         timeout-minutes: 2
