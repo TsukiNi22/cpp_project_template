@@ -9,6 +9,7 @@ The `setup.sh` script downloads it, renames the placeholders (`template` and `Co
  - [Generated project](#generated-project)
  - [Packages](#packages)
  - [Usage](#usage)
+ - [Pre-commit hook](#pre-commit-hook)
  - [Workflows/Release](#workflowsrelease)
 
 ## Dependencies
@@ -172,6 +173,18 @@ WINEPATH=/usr/x86_64-w64-mingw32/sys-root/mingw/bin wine ./<name>.exe --help
 
 > [!NOTE]
 > Every new `.cpp` must be added to the `SRC` (executable only) or `SRC_SHARED` (executable and library) list of the `CMakeLists.txt` (`get_unregistered_files` lists the missing ones). Portable code only for Windows: system calls through `utils::platform::`, `<windows.h>` before `<utils/utils.hpp>`.
+
+## Pre-commit hook
+
+The template ships a shared [xstyle](https://github.com/TsukiNi22/ai-utils) hook (`.githooks/pre-commit`, enabled with `git config core.hooksPath .githooks`) that checks the whole project and refuses a commit on any `minor` or worse issue. `setup.sh` copies it into the generated project with lighter settings (the staged lines only, refuses `major` issues, warns from `minor`), runs `git init` when needed and enables it.
+
+```bash
+git commit --no-verify    # skip the hook once (or XSTYLE_HOOK=0 git commit ...)
+xstyle --fix --staged     # fix what can be, then git add -u
+```
+
+> [!NOTE]
+> Without `xstyle` installed the hook only warns. The thresholds (`SCOPE`, `FAIL_ON`, `WARN_ON`) are the variables at the top of `.githooks/pre-commit`.
 
 ## Workflows/Release
 ### Workflows of the template
