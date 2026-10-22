@@ -154,6 +154,11 @@ fi
 rm -rf "$TMP_DIR/.git"
 
 ##### Edit the template copy (never the files already in the target directory) #####
+# xstyle pre-commit hook of the project: lighter than the one of the template (staged lines only, refuses major issues)
+if [[ -f "$TMP_DIR/.githooks/pre-commit" ]]; then
+    sed -i -E 's/^SCOPE="[^"]*"/SCOPE="staged"/; s/^FAIL_ON="[^"]*"/FAIL_ON="major"/; s/^WARN_ON="[^"]*"/WARN_ON="minor"/' "$TMP_DIR/.githooks/pre-commit"
+fi
+
 # Remove file & content that are only here for the template repository
 rm -f "$TMP_DIR/$SCRIPT_NAME" "$TMP_DIR/scripts.zip" # Remove this script
 rm -f "$TMP_DIR/.github/workflows/setup.yml" # Check of the script execution
@@ -381,6 +386,7 @@ EOF
  - [Usage](#usage)
  - [Windows (cross compilation)](#windows-cross-compilation)
  - [Unit tests](#unit-tests)
+ - [Pre-commit hook](#pre-commit-hook)
  - [Workflows/Release](#workflowsrelease)
 
 ## Dependencies
@@ -623,6 +629,16 @@ cmake --build build --parallel \$(nproc)                       # ./unit_tests at
 (cd build && ctest --output-on-failure)
 \`\`\`
 
+## Pre-commit hook
+
+A shared [xstyle](https://github.com/TsukiNi22/ai-utils) hook (\`.githooks/pre-commit\`) checks the staged lines at each \`git commit\` and refuses a \`major\` (or worse) issue. \`setup.sh\` already enabled it in this clone.
+
+\`\`\`bash
+git config core.hooksPath .githooks   # once per new clone
+git commit --no-verify                # skip the hook once (or XSTYLE_HOOK=0 git commit ...)
+xstyle --fix --staged                 # fix what can be, then git add -u
+\`\`\`
+
 ## Workflows/Release
 ### Workflows
 - \`Dispatch (CI/CD)\`: runs on every push (branch \`main\` or tag \`v*\`, not for \`*.md\` / \`*.txt\` / \`docs/\` only changes) and decides what to trigger from the ref / commit message
@@ -743,6 +759,16 @@ if [[ "$GH_PAGES" == true ]]; then
     fi
 fi
 rm -rf "$GH_PAGES_DIR"
+
+##### xstyle pre-commit hook (.githooks, shared with the clones: git config core.hooksPath .githooks) #####
+if [[ -f .githooks/pre-commit ]]; then
+    if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+        echo "Initializing the git repository (main)..."
+        git init -q -b main
+    fi
+    git config core.hooksPath .githooks
+    echo "Pre-commit hook enabled (xstyle, .githooks/pre-commit): skip once with git commit --no-verify"
+fi
 
 ##### Commit and push #####
 if [[ "$PUSH" = true ]]; then
