@@ -91,7 +91,7 @@ curl -fsSL https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main
 | `tests/` | GoogleTest unit tests (`-DBUILD_TESTS=ON`, `unit_tests` at the root, GTest fetched from the sources when cross compiling) |
 | `docs/` | HTML documentation: `index.html` (technical page, placeholder "coming soon"), `graph.html` (interactive project graph, refreshed from the repository), `logo.svg` |
 | `.github/workflows/` | `dispatch.yml`, `unit-tests.yml`, `build.yml`, `build-packages.yml`, `release.yml`, `docs.yml` (see [Workflows](#workflowsrelease)) |
-| `setup.sh` (gh-pages only) | Package repository setup of the project (mirror + GPG key + install, `--pre`, `--windows`, `--no-install`, `--no-sudo`), from `install.sh` of the template |
+| `setup.sh` (gh-pages only) | Package repository setup of the project (mirror + GPG key, `--install`, `--pre`, `--windows`, `--no-sudo`), from `install.sh` of the template |
 | `README.md`, `CHANGELOG.md` (both written by `setup.sh`), `LICENSE` (MIT), `Makefile`, `Doxyfile`, `.gitignore` | Project files |
 
 ### CMake options

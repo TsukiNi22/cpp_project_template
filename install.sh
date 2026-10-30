@@ -1,13 +1,13 @@
 #!/bin/bash
 # Package repository setup of template (becomes the setup.sh of a generated project): registers the gh-pages
-# mirror (RPM / DEB / Arch, signed) in the system package manager and installs the package.
+# mirror (RPM / DEB / Arch, signed) in the system package manager (--install also installs the package).
 set -euo pipefail
 
 BASE_URL="https://tsukini22.github.io/template"
 KEY_NAME="RPM-GPG-KEY-tsukini"
 PACKAGE="template"
 SUDO="sudo"
-INSTALL=true
+INSTALL=false
 CHANNEL=""
 PREFIX=""
 
@@ -15,11 +15,11 @@ PREFIX=""
 # Parse arguments
 # =========================
 usage() {
-    echo "Usage: $0 [--no-sudo] [--pre] [--windows] [--no-install]"
+    echo "Usage: $0 [--no-sudo] [--install] [--pre] [--windows]"
     echo "  --no-sudo      Run without sudo (requires the script to be run as root already)"
-    echo "  --pre          Install the pre-release/unstable package (template-pre)"
-    echo "  --windows      Install the Windows packages (mingw64-template, MinGW sysroot) instead of the Linux ones (rpm / deb only)"
-    echo "  --no-install   Only setup the mirror & gpg key, don't install the package"
+    echo "  --install      Also install the package (by default only the mirror & gpg key are setup)"
+    echo "  --pre          Select the pre-release/unstable package (template-pre)"
+    echo "  --windows      Select the Windows packages (mingw64-template, MinGW sysroot) instead of the Linux ones (rpm / deb only)"
     exit 1
 }
 
@@ -28,14 +28,14 @@ for arg in "$@"; do
         --no-sudo)
             SUDO=""
             ;;
+        --install)
+            INSTALL=true
+            ;;
         --pre)
             CHANNEL="-pre"
             ;;
         --windows)
             PREFIX="mingw64-"
-            ;;
-        --no-install)
-            INSTALL=false
             ;;
         -h|--help)
             usage

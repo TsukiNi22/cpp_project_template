@@ -529,7 +529,7 @@ Run the setup script directly, without cloning the repository. It registers the 
 2. \`rpm\`: add \`/etc/yum.repos.d/${PROJECT_NAME}.repo\` and import the GPG key.
 3. \`deb\`: add the GPG key in \`/etc/apt/keyrings/${PROJECT_NAME}.gpg\`, the source in \`/etc/apt/sources.list.d/${PROJECT_NAME}.list\`, then \`apt-get update\`.
 4. \`arch\`: add the GPG key to the pacman keyring (\`pacman-key --add\` + \`--lsign-key\`), the \`[${PROJECT_NAME}]\` repository in \`/etc/pacman.conf\` (\`SigLevel = Required\`), then \`pacman -Sy\`.
-5. Install the package \`${PACKAGE_BASE}\` (\`--pre\` for the unstable one, \`--windows\` for \`mingw64-${PACKAGE_BASE}\`, rpm / deb only).
+5. With \`--install\` only: install the package \`${PACKAGE_BASE}\` (\`--pre\` for the unstable one, \`--windows\` for \`mingw64-${PACKAGE_BASE}\`, rpm / deb only).
 
 \`\`\`bash
 wget -qO- https://raw.githubusercontent.com/${GITHUB_REPO}/main/setup.sh | bash -s
@@ -544,9 +544,9 @@ curl -fsSL https://raw.githubusercontent.com/${GITHUB_REPO}/main/setup.sh | bash
 | Argument | Effect |
 | -------- | ------ |
 | \`--no-sudo\` | Run without \`sudo\` (the script must already run as root) |
-| \`--pre\` | Install the pre-release/unstable package (\`${PACKAGE_BASE}-pre\`) |
-| \`--windows\` | Install the Windows packages (\`mingw64-${PACKAGE_BASE}\`, MinGW sysroot, rpm / deb only) |
-| \`--no-install\` | Only setup the mirror & GPG key, don't install the package |
+| \`--install\` | Also install the package (by default only the mirror & GPG key are setup) |
+| \`--pre\` | Select the pre-release/unstable package (\`${PACKAGE_BASE}-pre\`) |
+| \`--windows\` | Select the Windows packages (\`mingw64-${PACKAGE_BASE}\`, MinGW sysroot, rpm / deb only) |
 | \`-h\`, \`--help\` | Display the usage |
 EOF
         fi
