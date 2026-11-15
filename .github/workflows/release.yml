@@ -35,17 +35,36 @@ jobs:
         run: |
           set -euo pipefail
           # CHANGELOG sections: '## vX.Y.Z - YYYY-MM-DD' (stable) / '## [vX.Y.Z-pre] - YYYY-MM-DD' (pre-release)
-          awk -v tag="$GITHUB_REF_NAME" '
-            BEGIN {gsub(/\./, "\\.", tag)}
-            $0 ~ "^## \\[?" tag "\\]?( |$)" {found = 1; next}
-            found && /^## / {exit}
-            found {print}
-          ' CHANGELOG.md > notes.md
-          if [ ! -s notes.md ]; then
-            echo "::error title=Release notes,file=CHANGELOG.md::no section '## $GITHUB_REF_NAME - <date>' in CHANGELOG.md"
+          # A pre-release tag (vX.Y.Z-<suffix>) without its own section takes the '## [pre-release]' one
+          section() { # $1 = name of the section, brackets optional
+            awk -v name="$1" '
+              BEGIN {gsub(/\./, "\\.", name)}
+              $0 ~ "^## \\[?" name "\\]?( |$)" {found = 1; next}
+              found && /^## / {exit}
+              found {print}
+            ' CHANGELOG.md
+          }
+          has_notes() { grep -q '[^[:space:]]' notes.md; }
+
+          section "$GITHUB_REF_NAME" > notes.md
+          source="$GITHUB_REF_NAME"
+          case "$GITHUB_REF_NAME" in
+            *-*)
+              if ! has_notes; then
+                section "pre-release" > notes.md
+                source="pre-release"
+              fi
+              ;;
+          esac
+          if ! has_notes; then
+            case "$GITHUB_REF_NAME" in
+              *-*) expected="'## [$GITHUB_REF_NAME] - <date>' or a non empty '## [pre-release]'" ;;
+              *) expected="'## $GITHUB_REF_NAME - <date>'" ;;
+            esac
+            echo "::error title=Release notes,file=CHANGELOG.md::no section $expected in CHANGELOG.md"
             exit 1
           fi
-          echo "✓ notes of $GITHUB_REF_NAME ok"
+          echo "✓ notes of $GITHUB_REF_NAME ok (section [$source])"
 
       - name: Create the GitHub release
         env:
