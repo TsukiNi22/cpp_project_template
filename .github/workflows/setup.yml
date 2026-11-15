@@ -157,9 +157,14 @@ jobs:
         run: |
           set -euo pipefail
           mv template "$RUNNER_TEMP/template"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE" # Workspace owned by another user in the container (git init + hook of setup.sh)
           TEMPLATE_DIR="$RUNNER_TEMP/template" bash "$RUNNER_TEMP/template/setup.sh" "$PROJECT_NAME" "$CORE_NAME" --kind binary --no-gh-pages
           if [ -f .github/workflows/docs.yml ] || grep -q "sync-online-packages" .github/workflows/build-packages.yml; then
             echo "::error title=gh-pages left::gh-pages workflows kept without --gh-pages"
+            exit 1
+          fi
+          if [ "$(git config core.hooksPath)" != ".githooks" ]; then
+            echo "::error title=Hook not enabled::core.hooksPath not set to .githooks by setup.sh"
             exit 1
           fi
           echo "✓ generated project ok (binary, no gh-pages)"

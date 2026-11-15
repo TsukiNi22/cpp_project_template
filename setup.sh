@@ -12,14 +12,15 @@ TODAY="$(date +%Y-%m-%d)"
 
 ##### Argument #####
 usage() {
-    echo "Usage: $SCRIPT_NAME <project_name> <core_name> [--kind binary|library|header-only] [--gh-pages|--no-gh-pages] [--push]"
+    echo "Usage: $SCRIPT_NAME <project_name> <core_name> [--kind binary|library|header-only] [--gh-pages|--no-gh-pages] [--push] [--force]"
     echo "  <project_name>   Replaces 'template' (target, namespace, folders, packages): a C++ identifier"
     echo "  <core_name>      Replaces 'Core' (main class): a C++ identifier"
     echo "  --kind <kind>    Project kind (CMake TEMPLATE_KIND): binary (default), library or header-only"
     echo "  --gh-pages       Create the gh-pages branch (packages repository + documentation) and keep its workflows"
     echo "  --no-gh-pages    No gh-pages branch: the packages stay as artifacts, no docs publication"
     echo "                   (without these two flags the question is asked in the terminal, 'no' without one)"
-    echo "  --push           Commit and push the result (main, and gh-pages when created)"
+    echo "  --push           Commit and push the result (main, and gh-pages when created): needs the 'origin' remote"
+    echo "  --force          Overwrite the files already in the directory without asking"
     echo "Environment: REPO_URL, BRANCH, TEMPLATE_DIR (local template), GITHUB_REPO (owner/repo of the new project)"
     exit 1
 }
@@ -34,6 +35,7 @@ shift 2
 KIND=""
 GH_PAGES=""
 PUSH=false
+FORCE=false
 while [[ "$#" -gt 0 ]]; do
     case "$1" in
         --kind)
@@ -52,6 +54,9 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         --push|-push) # -push: previous name of the option
             PUSH=true
+            ;;
+        -f|--force)
+            FORCE=true
             ;;
         -h|--help)
             usage
@@ -87,9 +92,13 @@ if [[ "$PROJECT_NAME" == "testing" ]] || [[ "$CORE_NAME" == "Test" ]]; then
 fi
 
 ##### Interactive questions (terminal only: 'wget ... | bash' still has /dev/tty) #####
+has_tty() {
+    { : < /dev/tty && : > /dev/tty; } 2> /dev/null
+}
+
 ask() { # <question> <default> -> answer in REPLY, the default without a terminal
     REPLY="$2"
-    if { : < /dev/tty && : > /dev/tty; } 2> /dev/null; then
+    if has_tty; then
         printf '%s [%s] ' "$1" "$2" > /dev/tty
         read -r REPLY < /dev/tty || true
         REPLY="${REPLY:-$2}"
@@ -136,17 +145,31 @@ case "$KIND" in
     library) PACKAGE_BIN=OFF; PACKAGE_LIB=ON; PACKAGE_DEV=ON ;;
     header-only) PACKAGE_BIN=OFF; PACKAGE_LIB=OFF; PACKAGE_DEV=ON ;;
 esac
-if [[ "$PACKAGE_BIN" == "ON" ]]; then PACKAGE_BASE="$PROJECT_NAME"; else PACKAGE_BASE="lib$LIB_NAME"; fi
+
+# Package names (like the CMakeLists.txt): lower case and '-' instead of '_' (Debian / Arch naming)
+PACKAGE_NAME="$(echo "$PROJECT_NAME" | tr '[:upper:]_' '[:lower:]-')"
+PACKAGE_LIB_NAME="lib${PACKAGE_NAME#lib}"
+if [[ "$PACKAGE_BIN" == "ON" ]]; then PACKAGE_BASE="$PACKAGE_NAME"; else PACKAGE_BASE="$PACKAGE_LIB_NAME"; fi
+if ! [[ "$PACKAGE_BASE" =~ ^[a-z0-9][a-z0-9+.-]+$ ]]; then
+    echo "Invalid name '$PROJECT_NAME': the package would be named '$PACKAGE_BASE' (2 characters or more, starting with a letter or a digit)"
+    exit 1
+fi
+
+# --push needs somewhere to push (checked before any change)
+if [[ "$PUSH" == true ]] && ! git -C "$TARGET_DIR" remote get-url origin > /dev/null 2>&1; then
+    echo "Error: --push needs a git repository with an 'origin' remote in '$TARGET_DIR' (git init && git remote add origin <url>)" >&2
+    exit 1
+fi
 
 echo "Project: $PROJECT_NAME ($CORE_NAME), kind: $KIND, repository: $GITHUB_REPO, gh-pages: $GH_PAGES"
 
 ##### Clone into a temporary directory #####
 TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
+trap 'rm -rf "$TMP_DIR" "$TMP_DIR.gh-pages"' EXIT # the gh-pages seed is kept aside in $TMP_DIR.gh-pages
 
 if [[ -n "$TEMPLATE_DIR" ]]; then
     echo "Copying the local template ${TEMPLATE_DIR}..."
-    tar -C "$TEMPLATE_DIR" --exclude=./.git --exclude='./build*' --exclude=./.cache --exclude=./include/exception -cf - . | tar -C "$TMP_DIR" -xf -
+    tar -C "$TEMPLATE_DIR" --exclude=./.git --exclude='./build*' --exclude=./.cache --exclude=./include/template/exception -cf - . | tar -C "$TMP_DIR" -xf -
 else
     echo "Cloning ${REPO_URL} (branch: ${BRANCH})..."
     git clone --depth 1 --branch "$BRANCH" "$REPO_URL" "$TMP_DIR"
@@ -300,14 +323,18 @@ done
 ##### Replace 'template' inside file contents (CMake, .gitignore, headers, sources, workflows, scripts, repo) #####
 echo "Replacing 'template' references inside files..."
 for dir in "$TMP_DIR" "$GH_PAGES_DIR"; do
-    grep -rlZE --exclude-dir=.git --exclude-dir=utils --exclude-dir=docs --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" --include="*.cmake" --include="*.in" --include=".gitignore" --include="*.yml" --include="*.sh" --include="*.repo" --include="*.html" '\btemplate\b' "$dir" 2>/dev/null \
+    grep -rlZE --exclude-dir=.git --exclude-dir=utils --exclude-dir=docs --include="*.cpp" --include="*.hpp" --include="CMakeLists.txt" --include="*.cmake" --include="*.in" --include=".gitignore" --include="*.yml" --include="*.sh" --include="*.py" --include="*.repo" --include="*.html" '\btemplate\b' "$dir" 2>/dev/null \
         | xargs -0 -r sed -i "s/\btemplate\b/${PROJECT_NAME}/g" || true
     grep -rlZ --exclude-dir=.git --exclude-dir=utils --exclude-dir=docs --include="CMakeLists.txt" --include="*.cmake" --include="*.in" --include="*.yml" 'TEMPLATE_' "$dir" 2>/dev/null \
         | xargs -0 -r sed -i "s/TEMPLATE_/${NAME_UPPER}_/g" || true
 done
 sed -i "s/^PROJECT_NAME\( *\)= .*/PROJECT_NAME\1= \"${PROJECT_NAME}\"/" "$TMP_DIR/Doxyfile"
-sed -i "s|TsukiNi22/${PROJECT_NAME}\b|${GITHUB_REPO}|g; s|tsukini22.github.io/${PROJECT_NAME}\b|${PAGES_URL#https://}|g" \
-    "$TMP_DIR/CMakeLists.txt" "$GH_PAGES_DIR/$PROJECT_NAME.repo" $(ls "$TMP_DIR/setup.sh" 2>/dev/null)
+REPO_FILES=("$TMP_DIR/CMakeLists.txt" "$GH_PAGES_DIR/$PROJECT_NAME.repo")
+if [[ -f "$TMP_DIR/setup.sh" ]]; then
+    REPO_FILES+=("$TMP_DIR/setup.sh")
+    sed -i "s/^PACKAGE=\"[^\"]*\"/PACKAGE=\"${PACKAGE_BASE}\"/" "$TMP_DIR/setup.sh" # global package: lib<name> for a library
+fi
+sed -i "s|TsukiNi22/${PROJECT_NAME}\b|${GITHUB_REPO}|g; s|tsukini22.github.io/${PROJECT_NAME}\b|${PAGES_URL#https://}|g" "${REPO_FILES[@]}"
 
 ##### Rename files/directories containing 'Core' #####
 echo "Renaming files and directories: 'Core' -> '${CORE_NAME}'..."
@@ -354,8 +381,13 @@ EOF
 
 ##### README.md & CHANGELOG.md #####
 echo "Writing README.md and CHANGELOG.md..."
+LIBUTILS_VERSION="$(sed -n 's/^set(LIBUTILS_VERSION \([0-9.]*\)).*/\1/p' "$TMP_DIR/CMakeLists.txt")" # minimal libutils of the template
+LIBUTILS_VERSION="${LIBUTILS_VERSION:-4.1.0}"
 write_readme() {
     local lib="lib$LIB_NAME" repo_url="https://github.com/$GITHUB_REPO"
+    local pkg="$PACKAGE_NAME" pkg_lib="$PACKAGE_LIB_NAME" # package names (lower case, '-'), lib: the library file
+    local libutils_arch=""
+    [[ "$(printf '%s\n' "$LIBUTILS_VERSION" 4.2.0 | sort -V | head -1)" != "4.2.0" ]] && libutils_arch=", \`>= 4.2.0\` on Arch"
     {
         cat << EOF
 # ${PROJECT_NAME}
@@ -402,7 +434,7 @@ EOF
 | ---- | ------- | -------------- | --------------------- | --------------- |
 | \`clang++\` / \`cmake\` | C++20 / \`>= 3.20\` | \`clang cmake\` | \`clang cmake\` | \`clang cmake\` |
 | \`python3\` | \`>= 3.8\` | \`python3\` | \`python3\` | \`python\` |
-| \`libutils\` | \`4.x\` (\`>= 4.1.0\`, \`>= 4.2.0\` on Arch) | \`libutils\` | \`libutils\` | \`libutils\` |
+| \`libutils\` | \`${LIBUTILS_VERSION%%.*}.x\` (\`>= ${LIBUTILS_VERSION}\`${libutils_arch}) | \`libutils\` | \`libutils\` | \`libutils\` |
 | GoogleTest (tests only) | any | \`gtest-devel\` | \`libgtest-dev\` | \`gtest\` |
 | MinGW-w64 (Windows only) | GCC \`>= 13\` | \`mingw64-gcc-c++ mingw64-libutils\` | \`g++-mingw-w64-x86-64\` + libutils built for MinGW | — |
 | \`ccache\` **[OPTIONAL]** | any | \`ccache\` | \`ccache\` | \`ccache\` |
@@ -424,10 +456,10 @@ EOF
                 cat << EOF
 | File Name | Content |
 | --------- | ------- |
-| \`${PROJECT_NAME}\` | Install the default package (\`${PROJECT_NAME}-op\`) |
-| \`${PROJECT_NAME}-op\` | Executable compiled with the optimization options |
-| \`${PROJECT_NAME}-db\` | Executable compiled with the debug options (intended for debugging only) |
-| \`${PROJECT_NAME}-as\` | Executable compiled with the asan options (intended for debugging only) |
+| \`${pkg}\` | Install the default package (\`${pkg}-op\`) |
+| \`${pkg}-op\` | Executable compiled with the optimization options |
+| \`${pkg}-db\` | Executable compiled with the debug options (intended for debugging only) |
+| \`${pkg}-as\` | Executable compiled with the asan options (intended for debugging only) |
 
 > [!WARNING]
 > The three variants install the same \`/usr/bin/${PROJECT_NAME}\`: only one of them can be installed at a time.
@@ -437,22 +469,22 @@ EOF
                 cat << EOF
 | File Name | Content |
 | --------- | ------- |
-| \`${lib}\` | Install the default packages (\`${lib}-dev\`, \`${lib}-op\`) |
-| \`${lib}-dev\` | All the includes and the global CMake configuration (requires \`libutils-dev\`) |
-| \`${lib}-dev-op\` | CMake configuration for \`${lib}-op\` |
-| \`${lib}-dev-db\` | CMake configuration for \`${lib}-db\` |
-| \`${lib}-dev-as\` | CMake configuration for \`${lib}-as\` |
-| \`${lib}-op\` | Library compiled with the optimization options (\`${lib}.a\`) |
-| \`${lib}-db\` | Library compiled with the debug options (\`${lib}_debug.a\`, intended for debugging only) |
-| \`${lib}-as\` | Library compiled with the asan options (\`${lib}_asan.a\`, intended for debugging only) |
+| \`${pkg_lib}\` | Install the default packages (\`${pkg_lib}-dev\`, \`${pkg_lib}-op\`) |
+| \`${pkg_lib}-dev\` | All the includes and the global CMake configuration (requires \`libutils-dev\`) |
+| \`${pkg_lib}-dev-op\` | CMake configuration for \`${pkg_lib}-op\` |
+| \`${pkg_lib}-dev-db\` | CMake configuration for \`${pkg_lib}-db\` |
+| \`${pkg_lib}-dev-as\` | CMake configuration for \`${pkg_lib}-as\` |
+| \`${pkg_lib}-op\` | Library compiled with the optimization options (\`${lib}.a\`) |
+| \`${pkg_lib}-db\` | Library compiled with the debug options (\`${lib}_debug.a\`, intended for debugging only) |
+| \`${pkg_lib}-as\` | Library compiled with the asan options (\`${lib}_asan.a\`, intended for debugging only) |
 EOF
                 ;;
             header-only)
                 cat << EOF
 | File Name | Content |
 | --------- | ------- |
-| \`${lib}\` | Install the default package (\`${lib}-dev\`) |
-| \`${lib}-dev\` | All the includes and the CMake configuration (requires \`libutils-dev\`) |
+| \`${pkg_lib}\` | Install the default package (\`${pkg_lib}-dev\`) |
+| \`${pkg_lib}-dev\` | All the includes and the CMake configuration (requires \`libutils-dev\`) |
 EOF
                 ;;
         esac
@@ -556,6 +588,11 @@ EOF
 
 \`\`\`bash
 make                                                      # Configure & build into build/
+make debug / asan / optimized                             # Build in this mode
+make tests                                                # Build (Debug) and run the unit tests
+make release                                              # Debug, Asan & Optimized builds
+make package                                              # RPM / DEB / Arch packages of every variant
+make install                                              # Install the current build (sudo make install)
 make re                                                   # Full rebuild
 make fclean                                               # Remove the build directory
 
@@ -580,9 +617,9 @@ EOF
 | Option | Default | Content |
 | ------ | ------- | ------- |
 | \`${NAME_UPPER}_KIND\` | \`${KIND}\` | Project kind (\`binary\`, \`library\`, \`header-only\`): defaults of the three options below |
-| \`${NAME_UPPER}_PACKAGE_BIN\` | \`${PACKAGE_BIN}\` | Build and package the executable (\`${PROJECT_NAME}-op\` / \`-db\` / \`-as\`) |
-| \`${NAME_UPPER}_PACKAGE_LIB\` | \`${PACKAGE_LIB}\` | Build and package the library (\`${lib}-op\` / \`-db\` / \`-as\`) |
-| \`${NAME_UPPER}_PACKAGE_DEV\` | \`${PACKAGE_DEV}\` | Package the public headers and the CMake config (\`${lib}-dev\`) |
+| \`${NAME_UPPER}_PACKAGE_BIN\` | \`${PACKAGE_BIN}\` | Build and package the executable (\`${pkg}-op\` / \`-db\` / \`-as\`) |
+| \`${NAME_UPPER}_PACKAGE_LIB\` | \`${PACKAGE_LIB}\` | Build and package the library (\`${pkg_lib}-op\` / \`-db\` / \`-as\`) |
+| \`${NAME_UPPER}_PACKAGE_DEV\` | \`${PACKAGE_DEV}\` | Package the public headers and the CMake config (\`${pkg_lib}-dev\`) |
 | \`${NAME_UPPER}_SHARED_LIB\` | \`OFF\` | Shared library (\`.so\` / \`.dll\`) instead of a static one |
 | \`${NAME_UPPER}_STABLE_RELEASE\` | \`OFF\` | Package channel: stable (\`ON\`) or pre-release \`-pre\` (\`OFF\`) |
 | \`BUILD_TESTS\` | \`OFF\` | Build the unit tests (\`unit_tests\`, GoogleTest) |
@@ -602,7 +639,7 @@ EOF
 | \`cmake/toolchain/mingw-w64.cmake\` | Windows cross compilation toolchain |
 | \`cmake/package/\` | CMake package config (\`find_package(${PROJECT_NAME})\`) and the CPack prefix of the Windows packages |
 | \`docs/\` | HTML documentation (technical page, project graph) |
-| \`include/exception/generated_external_exception_header.hpp\` | Generated at build time from the JSON files (not committed) |
+| \`include/${PROJECT_NAME}/exception/generated_external_exception_header.hpp\` | Generated at build time from the JSON files (not committed) |
 
 > [!NOTE]
 > Every new \`.cpp\` must be added to the \`SRC\` (executable only) or \`SRC_SHARED\` (executable and library) list of the \`CMakeLists.txt\` (\`get_unregistered_files\` lists the missing ones).
@@ -627,6 +664,7 @@ WINEPATH=/usr/x86_64-w64-mingw32/sys-root/mingw/bin wine ./${PROJECT_NAME}.exe -
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
 cmake --build build --parallel \$(nproc)                       # ./unit_tests at the root
 (cd build && ctest --output-on-failure)
+make tests                                                    # the three commands above
 \`\`\`
 
 ## Pre-commit hook
@@ -642,20 +680,21 @@ xstyle --fix --staged                 # fix what can be, then git add -u
 ## Workflows/Release
 ### Workflows
 - \`Dispatch (CI/CD)\`: runs on every push (branch \`main\` or tag \`v*\`, not for \`*.md\` / \`*.txt\` / \`docs/\` only changes) and decides what to trigger from the ref / commit message
-- \`Unit Tests (CI)\`: builds and runs the unit tests, always first (Linux in the \`unit-tests\` image, Windows in the \`mingw64-unit-tests\` image under \`wine\`)
+- \`Lint (CI)\`: runs on every push (not with \`[ignore]\`): \`shellcheck\` on the shell scripts, \`actionlint\` on the workflows, \`xstyle\` on the project (refuses a \`major\` issue)
+- \`Unit Tests (CI)\`: builds and runs the unit tests, always first (Linux in the \`unit-tests\` image: Debug then AddressSanitizer, Windows in the \`mingw64-unit-tests\` image under \`wine\`)
 - \`Build (CI)\`: only builds the project (Linux in the \`ci\` image, Windows in the \`mingw64-ci\` image) and checks the outputs, without producing packages
 EOF
         if [[ "$GH_PAGES" == true ]]; then
             cat << EOF
 - \`Build - Packages (CI/CD)\`: builds the packages (RPM/DEB/Arch: Linux in the \`ci\` image, Windows \`mingw64-*\` in the \`mingw64-ci\` image), signs them and publishes them on the \`gh-pages\` repository
-- \`Release - GitHub (CD)\`: creates the GitHub release of a tag from its section of the \`CHANGELOG.md\` (\`## [pre-release]\` for a \`-pre\` tag without its own section), once the packages are published
+- \`Release - GitHub (CD)\`: creates the GitHub release of a tag from its section of the \`CHANGELOG.md\` (\`## [pre-release]\` for a \`-pre\` tag without its own section) with the packages attached, once the packages are published
 - \`Docs - Pages (CD)\`: copies \`docs/\` on the \`gh-pages\` branch on every push changing it (${PAGES_URL}/docs/)
 - \`Sync Packages (CD)\` (on \`gh-pages\`): rebuilds the metadata and signatures of the package repository after a manual push on the branch
 EOF
         else
             cat << EOF
 - \`Build - Packages (CI/CD)\`: builds the packages (RPM/DEB/Arch: Linux in the \`ci\` image, Windows \`mingw64-*\` in the \`mingw64-ci\` image), kept as artifacts of the run
-- \`Release - GitHub (CD)\`: creates the GitHub release of a tag from its section of the \`CHANGELOG.md\` (\`## [pre-release]\` for a \`-pre\` tag without its own section), once the packages are built
+- \`Release - GitHub (CD)\`: creates the GitHub release of a tag from its section of the \`CHANGELOG.md\` (\`## [pre-release]\` for a \`-pre\` tag without its own section) with the packages attached, once the packages are built
 EOF
         fi
         cat << EOF
@@ -688,6 +727,9 @@ EOF
         cat << EOF
 ### Release (stable)
 The release of the packages (channel \`stable\`) and the stable GitHub release are only triggered by a tag matching exactly \`vx.x.x\` (ex: \`v1.0.0\`), whose section must exist in the \`CHANGELOG.md\`.
+
+> [!IMPORTANT]
+> The version of a tag (\`vx.x.x\`, suffix ignored) must be the one of \`project(... VERSION x.x.x)\` in the \`CMakeLists.txt\`: the packages are refused otherwise.
 
 ### Downstream notification
 \`Dispatch (CI/CD)\` has a commented \`notify-downstream\` job (\`repository_dispatch\` to another repository, like libutils -> docker-image), triggered after a package publication or by a commit containing \`[release]\`.
@@ -729,6 +771,22 @@ EOF
 
 ##### Move files to the target directory #####
 mkdir -p "$TARGET_DIR"
+mapfile -t EXISTING < <(cd "$TMP_DIR" && find . -type f -printf '%P\n' | sort | while read -r file; do
+    [[ -e "$OLDPWD/$TARGET_DIR/$file" ]] && echo "$file"
+done || true)
+if [[ "${#EXISTING[@]}" -gt 0 ]]; then
+    echo "Warning: ${#EXISTING[@]} file(s) already in '$TARGET_DIR' will be overwritten: ${EXISTING[*]}" >&2
+    if [[ "$FORCE" != true ]] && has_tty; then
+        ask "Overwrite them? [y/N]" "n"
+        case "$REPLY" in
+            y|Y|yes|YES) ;;
+            *)
+                echo "Aborted: nothing changed (use --force to overwrite without asking)"
+                exit 1
+                ;;
+        esac
+    fi
+fi
 cp -r "$TMP_DIR"/. "$TARGET_DIR"/
 cd "$TARGET_DIR"
 
@@ -766,10 +824,14 @@ rm -rf "$GH_PAGES_DIR"
 if [[ -f .githooks/pre-commit ]]; then
     if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
         echo "Initializing the git repository (main)..."
-        git init -q -b main
+        git init -q -b main || true
     fi
-    git config core.hooksPath .githooks
-    echo "Pre-commit hook enabled (xstyle, .githooks/pre-commit): skip once with git commit --no-verify"
+    # Never fatal: the project is already set up (git missing, or directory refused by git: owned by another user)
+    if git config core.hooksPath .githooks 2> /dev/null; then
+        echo "Pre-commit hook enabled (xstyle, .githooks/pre-commit): skip once with git commit --no-verify"
+    else
+        echo "Warning: pre-commit hook not enabled (git missing, or directory not trusted: git config --global --add safe.directory \"\$PWD\"), enable it with: git config core.hooksPath .githooks" >&2
+    fi
 fi
 
 ##### Commit and push #####
@@ -777,7 +839,11 @@ if [[ "$PUSH" = true ]]; then
     echo "Pushing changes..."
     git add .
     git commit -m "chore: setup c++20 project from cpp_project_template"
-    git push
+    if git rev-parse --abbrev-ref --symbolic-full-name '@{u}' > /dev/null 2>&1; then
+        git push
+    else
+        git push -u origin "$(git branch --show-current)" # new repository: no upstream yet
+    fi
     if [[ "$GH_PAGES" == true ]]; then
         git push origin gh-pages
     fi
