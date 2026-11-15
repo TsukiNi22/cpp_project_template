@@ -3,8 +3,10 @@
 *.o
 *.a
 *.so
+*.exe
+*.dll
 a.out
-include/exception/generated_external_exception_header.hpp
+include/template/exception/generated_external_exception_header.hpp
 
 ## Vim
 *.sw*
@@ -21,6 +23,8 @@ z
 
 ## CMake
 /build
+/build-*
+*.pkg.tar.zst
 compile_commands.json
 __pycache__
 

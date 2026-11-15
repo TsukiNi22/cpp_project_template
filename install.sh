@@ -5,7 +5,7 @@ set -euo pipefail
 
 BASE_URL="https://tsukini22.github.io/template"
 KEY_NAME="RPM-GPG-KEY-tsukini"
-PACKAGE="template"
+PACKAGE="template" # global package: <name> (executable) or lib<name> (library, header-only)
 SUDO="sudo"
 INSTALL=false
 CHANNEL=""
@@ -18,8 +18,8 @@ usage() {
     echo "Usage: $0 [--no-sudo] [--install] [--pre] [--windows]"
     echo "  --no-sudo      Run without sudo (requires the script to be run as root already)"
     echo "  --install      Also install the package (by default only the mirror & gpg key are setup)"
-    echo "  --pre          Select the pre-release/unstable package (template-pre)"
-    echo "  --windows      Select the Windows packages (mingw64-template, MinGW sysroot) instead of the Linux ones (rpm / deb only)"
+    echo "  --pre          Select the pre-release/unstable package (${PACKAGE}-pre)"
+    echo "  --windows      Select the Windows packages (mingw64-${PACKAGE}, MinGW sysroot) instead of the Linux ones (rpm / deb only)"
     exit 1
 }
 

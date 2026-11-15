@@ -44,7 +44,7 @@ add_executable(${TARGET} ${SRC} ${SRC_PROJECT})
 # =========================
 # Dependencies
 # =========================
-target_include_directories(${TARGET} PRIVATE ../include/ ../include/exception/ .)
+target_include_directories(${TARGET} PRIVATE ../include/ ${GENERATED_EXCEPTION_DIR} .)
 target_link_libraries(${TARGET} PRIVATE utils::utils GTest::gtest GTest::gtest_main)
 if(TEMPLATE_PACKAGE_LIB)
     target_link_libraries(${TARGET} PRIVATE ${TARGET_LIB})

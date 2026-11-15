@@ -55,6 +55,11 @@ else()
 endif()
 string(REGEX REPLACE "^lib" "" LIB_NAME ${TARGET}) # lib<name>.a, never liblib<name>.a
 
+# Package names: lower case and '-' instead of '_' (Debian / Arch naming), ex: My_Lib -> my-lib, libmy-lib
+string(TOLOWER "${TARGET}" PACKAGE_TARGET)
+string(REPLACE "_" "-" PACKAGE_TARGET "${PACKAGE_TARGET}")
+string(REGEX REPLACE "^lib" "" PACKAGE_LIB_TARGET "${PACKAGE_TARGET}")
+
 # =========================
 # Compilateur & Standard
 # =========================
@@ -148,8 +153,10 @@ file(GLOB_RECURSE EXCEPTION_CONFIG_FILES
     CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/cmake/config/exceptions/*.json"
 )
+# In include/<name>/exception: a path of its own once installed (several projects can be installed side by side)
+set(GENERATED_EXCEPTION_DIR "${CMAKE_SOURCE_DIR}/include/${TARGET}/exception")
 set(GENERATED_EXCEPTION_HEADER
-    "${CMAKE_SOURCE_DIR}/include/exception/generated_external_exception_header.hpp"
+    "${GENERATED_EXCEPTION_DIR}/generated_external_exception_header.hpp"
 )
 add_custom_command(
     OUTPUT ${GENERATED_EXCEPTION_HEADER}
@@ -236,7 +243,7 @@ add_custom_target(package_release
 # Dependencies
 # =========================
 foreach(target ${COMPILED_TARGETS})
-    target_include_directories(${target} PRIVATE include/exception)
+    target_include_directories(${target} PRIVATE ${GENERATED_EXCEPTION_DIR})
     add_dependencies(${target} generated_external_exception_header)
 endforeach()
 if(TEMPLATE_PACKAGE_LIB)
@@ -468,17 +475,21 @@ if(WIN32)
     )
     set(LIBUTILS_PACKAGE "mingw64-libutils")
     set(SYSTEM_DEPENDS "") # no Debian package of the MinGW OpenSSL
+    set(DEB_RUNTIME_DEPENDS "")
     set(RPM_SYSTEM_REQUIRES ", mingw64-openssl") # dll of the sysroot needed by libutils
 else()
     set(PACKAGE_PREFIX "")
     set(LIBUTILS_PACKAGE "libutils")
     set(SYSTEM_DEPENDS "")
+    # Shared libraries of a linked binary (executable, .so): found by the RPM auto requires, listed by hand for
+    # Debian (no dpkg-shlibdeps on the build image). Update it with the libraries linked (readelf -d <binary>)
+    set(DEB_RUNTIME_DEPENDS "libc6, libgcc-s1, libstdc++6, libssl3")
     set(RPM_SYSTEM_REQUIRES "") # found by the RPM auto requires (openssl-libs)
 endif()
 
 # Package bases: the executable <name>, the library lib<name>, the headers with the library (else with the executable)
-set(PACKAGE_BIN "${PACKAGE_PREFIX}${TARGET}")
-set(PACKAGE_LIB "${PACKAGE_PREFIX}lib${LIB_NAME}")
+set(PACKAGE_BIN "${PACKAGE_PREFIX}${PACKAGE_TARGET}")
+set(PACKAGE_LIB "${PACKAGE_PREFIX}lib${PACKAGE_LIB_TARGET}")
 if(TEMPLATE_PACKAGE_BIN)
     set(PACKAGE_BASE "${PACKAGE_BIN}")
 else()
@@ -658,6 +669,9 @@ else()
         set(CPACK_RPM_BIN_PACKAGE_CONFLICTS "${BIN_CONFLICTS}")
         set(CPACK_DEBIAN_BIN_PACKAGE_BREAKS "${BIN_CONFLICTS}")
         set(CPACK_DEBIAN_BIN_PACKAGE_CONFLICTS "${BIN_CONFLICTS}")
+        if(DEB_RUNTIME_DEPENDS)
+            set(CPACK_DEBIAN_BIN_PACKAGE_DEPENDS "${DEB_RUNTIME_DEPENDS}")
+        endif()
         if(WIN32)
             set(CPACK_RPM_BIN_PACKAGE_REQUIRES "mingw64-openssl") # dll of the sysroot needed by libutils
         endif()
@@ -683,6 +697,9 @@ else()
             set(CPACK_RPM_LIB_PACKAGE_REQUIRES "${LIBUTILS_PACKAGE}-${VARIANT} >= ${LIBUTILS_VERSION}${RPM_SYSTEM_REQUIRES}")
             set(CPACK_DEBIAN_LIB_PACKAGE_DEPENDS "${LIBUTILS_PACKAGE}-${VARIANT} (>= ${LIBUTILS_VERSION})${SYSTEM_DEPENDS}")
             set(CPACK_ARCH_LIB_PACKAGE_DEPENDS "${LIBUTILS_PACKAGE}-${VARIANT}>=${ARCH_LIBUTILS_VERSION}")
+        endif()
+        if(TEMPLATE_SHARED_LIB AND DEB_RUNTIME_DEPENDS)
+            string(APPEND CPACK_DEBIAN_LIB_PACKAGE_DEPENDS ", ${DEB_RUNTIME_DEPENDS}") # .so: linked like an executable
         endif()
         if(VARIANT STREQUAL "db" AND NOT WIN32)
             set(CPACK_RPM_LIB_PACKAGE_SUGGESTS "gdb")

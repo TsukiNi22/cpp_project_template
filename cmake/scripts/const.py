@@ -75,7 +75,7 @@ class Files:
     """
     REQUIREMENTS: str = "cmake/scripts/requirements.txt"
     CONFIG_EXCEPTION: str = "cmake/config/exceptions/"
-    GENERATED_EXCEPTION_HEADER: str = "include/exception/generated_external_exception_header.hpp"
+    GENERATED_EXCEPTION_HEADER: str = "include/template/exception/generated_external_exception_header.hpp"
 
 @dataclass(frozen=True)
 class Names:
