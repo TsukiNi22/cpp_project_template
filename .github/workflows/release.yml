@@ -1,10 +1,11 @@
 name: Release - GitHub (CD)
 
 on:
-  workflow_dispatch: # Triggered by Dispatch (CI/CD) on a tag vX.Y.Z / vX.Y.Z-pre, once the packages are published
+  workflow_dispatch: # Triggered by Dispatch (CI/CD) on a tag vX.Y.Z / vX.Y.Z-pre, once the packages are built (attached to the release)
 
 permissions:
   contents: write
+  actions: read # packages (artifacts) of the Build - Packages run of the tag
 
 jobs:
   release:
@@ -66,6 +67,21 @@ jobs:
           fi
           echo "✓ notes of $GITHUB_REF_NAME ok (section [$source])"
 
+      - name: Packages of the tag (artifacts of Build - Packages)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          command -v gh > /dev/null || dnf install -y gh
+          mkdir -p packages
+          # Last successful build of this tag (dispatched on the tag: the branch of the run is the tag name)
+          RUN_ID="$(gh run list --workflow build-packages.yml --branch "$GITHUB_REF_NAME" --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty')"
+          if [ -z "$RUN_ID" ] || ! gh run download "$RUN_ID" --pattern 'compiled-packages*' --dir packages; then
+            echo "::warning title=Release assets::no packages found for $GITHUB_REF_NAME (artifacts kept 1 day): release created without assets"
+          fi
+          echo "✓ $(find packages -type f | wc -l) package(s) to attach (run: ${RUN_ID:-none})"
+
       - name: Create the GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -75,4 +91,5 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           prerelease=()
           case "$GITHUB_REF_NAME" in *-*) prerelease=(--prerelease) ;; esac
-          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md "${prerelease[@]}"
+          mapfile -t assets < <(find packages -type f \( -name '*.rpm' -o -name '*.deb' -o -name '*.pkg.tar.zst' \) | sort)
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md "${prerelease[@]}" "${assets[@]}"
