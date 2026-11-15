@@ -41,10 +41,13 @@ Build requirements:
 > Setup into the current directory
 
 > [!IMPORTANT]
-> With `--push`, the script must be run from inside an existing Git repository with a configured remote: it finishes with `git add . && git commit && git push` (and `git push origin gh-pages` when the branch is created).
+> With `--push`, the script must be run from inside an existing Git repository with a configured remote: (`origin`, checked before any change): it finishes with `git add . && git commit && git push` (`git push -u origin <branch>` when the branch has no upstream yet, and `git push origin gh-pages` when the branch is created).
+
+> [!NOTE]
+> The files already in the directory that the template would overwrite (`README.md`, `LICENSE`, `.gitignore`...) are listed first: the confirmation is asked in a terminal, `--force` skips it.
 
 > [!WARNING]
-> `<project_name>` and `<core_name>` are used as C++ namespace and class name: they must be valid C++ identifiers (`[A-Za-z_][A-Za-z0-9_]*`), ex: `my_project`, not `my-project`. `testing` / `Test` are refused (GoogleTest namespace).
+> `<project_name>` and `<core_name>` are used as C++ namespace and class name: they must be valid C++ identifiers (`[A-Za-z_][A-Za-z0-9_]*`), ex: `my_project`, not `my-project`. `testing` / `Test` are refused (GoogleTest namespace). The packages are named after `<project_name>` in lower case with `-` instead of `_` (`My_Project` -> `my-project`, `libmy-project`).
 
 1. Clones the latest version of the template (`main` branch) into a temporary directory
 2. Asks the project kind and the `gh-pages` question in the terminal when they are not given as flags (defaults: `binary`, no `gh-pages`, also without a terminal)
@@ -71,6 +74,7 @@ curl -fsSL https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main
 | `--kind <kind>` | Project kind: `binary` (default), `library` (`.a` / `.so` + headers) or `header-only` (asked in the terminal when missing) |
 | `--gh-pages` / `--no-gh-pages` | Create (or not) the `gh-pages` branch and keep its workflows (asked in the terminal when missing, `no` without a terminal) |
 | `--push` (`-push`) | Commits and pushes the result (skipped by default) |
+| `--force` (`-f`) | Overwrites the files already in the directory without asking |
 
 | Environment variable | Effect |
 | -------------------- | ------ |
@@ -83,7 +87,7 @@ curl -fsSL https://raw.githubusercontent.com/TsukiNi22/cpp_project_template/main
 
 | Path | Content |
 | ---- | ------- |
-| `CMakeLists.txt` | Options at the top (kind, package content), libutils, exception header generation, `release` / `install_release` / `package_release` targets, CPack |
+| `CMakeLists.txt` | Options at the top (kind, package content), libutils, exception header generation (`include/<name>/exception/`), `release` / `install_release` / `package_release` targets, CPack |
 | `cmake/toolchain/mingw-w64.cmake` | Windows (x86_64) cross compilation toolchain: `cmake -S . -B build-windows -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/mingw-w64.cmake` |
 | `cmake/package/` | `Config.cmake.in` (`find_package(<project_name>)`, checks the installed variant), `CPackProjectConfig.cmake` (MinGW sysroot prefix of the Windows packages) |
 | `cmake/config/exceptions/*.json`, `cmake/scripts/` | Project exception codes (`utils::exception::ExternalCode`) and their generator (`generate_exception_header.py`, `const.py`), `check_files.sh` |
@@ -118,7 +122,7 @@ The options are at the very top of the `CMakeLists.txt` (`<NAME>` = project name
 > Every package has a pre-release/unstable version named `<package_name>-pre`.
 > The `-pre` packages are marked as obsolete by any release/stable package (without `-pre`) of the same version or higher.
 
-One version for the whole project (`project(... VERSION X.Y.Z)`), the same naming as libutils (`<name>` = project name, `lib<name>` = the library, never `liblib...`):
+One version for the whole project (`project(... VERSION X.Y.Z)`), the same naming as libutils (`<name>` = project name in lower case with `-` instead of `_`, `lib<name>` = the library, never `liblib...`):
 
 | File Name | Content | With |
 | --------- | ------- | ---- |
@@ -149,6 +153,10 @@ Of the template itself (the template does not compile as is: `template` is a C++
 
 ```bash
 make                                                      # Configure & build into build/ (executable at the root)
+make debug / asan / optimized                             # Build in this mode
+make tests                                                # Build (Debug) and run the unit tests
+make release / package                                    # release / package_release targets
+make install                                              # Install the current build (sudo make install)
 make re                                                   # Full rebuild
 make fclean                                               # Remove the build directory
 
@@ -192,10 +200,11 @@ xstyle --fix --staged     # fix what can be, then git add -u
 
 ### Workflows of a generated project
 - `Dispatch (CI/CD)`: runs on every push (branch `main` or tag `v*`, not for `*.md` / `*.txt` / `docs/` only changes) and decides what to trigger from the ref / commit message
-- `Unit Tests (CI)`: builds and runs the unit tests, always first (Linux in the `unit-tests` image, Windows in the `mingw64-unit-tests` image under `wine`)
+- `Lint (CI)`: runs on every push (not with `[ignore]`), also on the template repository: `shellcheck` on the shell scripts, `actionlint` on the workflows, `xstyle` on the project (refuses a `major` issue); a tool that cannot be installed is only a warning
+- `Unit Tests (CI)`: builds and runs the unit tests, always first (Linux in the `unit-tests` image: Debug then AddressSanitizer, Windows in the `mingw64-unit-tests` image under `wine`)
 - `Build (CI)`: only builds the project (Linux in the `ci` image, Windows in the `mingw64-ci` image) and checks the outputs (executable / libraries), without producing packages
-- `Build - Packages (CI/CD)`: builds the packages (RPM/DEB/Arch: Linux in the `ci` image, Windows `mingw64-*` in the `mingw64-ci` image), checks them against the `PACKAGE_*` content, then (gh-pages only) signs and publishes them on the `gh-pages` repository (`fedora/44/x86_64`, `debian/`, `arch/x86_64`, 5 last `-pre` versions kept)
-- `Release - GitHub (CD)`: creates the GitHub release of a tag from its section of the `CHANGELOG.md` (`## vX.Y.Z - date` / `## [vX.Y.Z-pre] - date`, else `## [pre-release]` for a `-pre` tag), once the packages are built / published
+- `Build - Packages (CI/CD)`: builds the packages (RPM/DEB/Arch: Linux in the `ci` image, Windows `mingw64-*` in the `mingw64-ci` image), refuses a tag whose version is not the one of `project(... VERSION X.Y.Z)`, checks them against the `PACKAGE_*` content, then (gh-pages only) signs and publishes them on the `gh-pages` repository (`fedora/44/x86_64`, `debian/`, `arch/x86_64`, 5 last `-pre` versions kept)
+- `Release - GitHub (CD)`: creates the GitHub release of a tag from its section of the `CHANGELOG.md` (`## vX.Y.Z - date` / `## [vX.Y.Z-pre] - date`, else `## [pre-release]` for a `-pre` tag) with the packages of the tag attached (`.rpm`, `.deb`, `.pkg.tar.zst`), once they are built / published
 - `Docs - Pages (CD)` (gh-pages only): copies `docs/` on the `gh-pages` branch on every push changing it (`https://<owner>.github.io/<repo>/`)
 - `Sync Packages (CD)` (on the `gh-pages` branch): rebuilds the metadata and signatures of the package repository after a manual push on the branch (not the bot / docs commits)
 
@@ -217,6 +226,9 @@ A tag `vx.x.x-<suffix>` also creates a GitHub pre-release, whose notes are its `
 
 ### Release (stable)
 The release of the packages (channel `stable`) and the stable GitHub release are only triggered by a tag matching exactly `vx.x.x` (ex: `v1.0.0`), whose section must exist in the `CHANGELOG.md`.
+
+> [!IMPORTANT]
+> The version of a tag (`vx.x.x`, suffix ignored) must be the one of `project(... VERSION x.x.x)` in the `CMakeLists.txt`: the packages are refused otherwise.
 
 ### Downstream notification
 A commit containing `[release]` (or a package publication) is the trigger of the commented `notify-downstream` job of `Dispatch (CI/CD)`.
