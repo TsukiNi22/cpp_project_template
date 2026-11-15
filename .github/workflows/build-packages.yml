@@ -36,6 +36,20 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Check the version of the tag
+        if: github.ref_type == 'tag'
+        run: |
+          set -euo pipefail
+          # A tag vX.Y.Z / vX.Y.Z-<suffix> publishes the packages of project(... VERSION X.Y.Z): both must match
+          VERSION="$(sed -nE 's/^project\(.*VERSION ([0-9]+(\.[0-9]+)*).*/\1/p' CMakeLists.txt | head -1)"
+          TAG="${GITHUB_REF_NAME#v}"
+          TAG="${TAG%%-*}"
+          if [ "$VERSION" != "$TAG" ]; then
+            echo "::error title=Version mismatch,file=CMakeLists.txt::tag $GITHUB_REF_NAME but project(... VERSION $VERSION) in the CMakeLists.txt: update the version, then move the tag"
+            exit 1
+          fi
+          echo "✓ tag $GITHUB_REF_NAME = project version $VERSION"
+
       - name: Cache ccache
         uses: actions/cache@v5
         with:
@@ -59,6 +73,8 @@ jobs:
           set -euo pipefail
           # Expected files: <base>-<variant>-<version>-Linux-<component>.<ext>, <dev>-<version>-Linux-headers[-<variant>].<ext>, <base>-<version>-Linux.<ext>
           # (<version> = X.Y.Z or pre-X.Y.Z), the file base is the executable name, else the library one
+          NAME="${NAME,,}" # package names: lower case, '-' instead of '_' (like the CMakeLists.txt)
+          NAME="${NAME//_/-}"
           LIB="lib${NAME#lib}"
           if [ "$PACKAGE_BIN" = "ON" ]; then BASE="$NAME"; else BASE="$LIB"; fi
           if [ "$PACKAGE_LIB" = "ON" ]; then DEV="$LIB-dev"; else DEV="$BASE-dev"; fi
@@ -87,6 +103,8 @@ jobs:
         run: |
           set -euo pipefail
           # Expected files: <package>-<pkgver>-<pkgrel>-<arch>.pkg.tar.zst, one per package (named like the RPM / DEB packages)
+          NAME="${NAME,,}" # package names: lower case, '-' instead of '_' (like the CMakeLists.txt)
+          NAME="${NAME//_/-}"
           LIB="lib${NAME#lib}"
           if [ "$PACKAGE_BIN" = "ON" ]; then BASE="$NAME"; else BASE="$LIB"; fi
           if [ "$PACKAGE_LIB" = "ON" ]; then DEV="$LIB-dev"; else DEV="$BASE-dev"; fi
@@ -156,6 +174,8 @@ jobs:
         run: |
           set -euo pipefail
           # Same files as the Linux ones with the mingw64- prefix and the win64 system, without the Asan variant
+          NAME="${NAME,,}" # package names: lower case, '-' instead of '_' (like the CMakeLists.txt)
+          NAME="${NAME//_/-}"
           LIB="mingw64-lib${NAME#lib}"
           if [ "$PACKAGE_BIN" = "ON" ]; then BASE="mingw64-$NAME"; else BASE="$LIB"; fi
           if [ "$PACKAGE_LIB" = "ON" ]; then DEV="$LIB-dev"; else DEV="$BASE-dev"; fi
@@ -377,5 +397,14 @@ jobs:
             exit 0
           fi
           git commit -m "chore: sync packages from main (${{ github.sha }})"
-          git push origin gh-pages
+          # gh-pages can move meanwhile (docs, packages or manual push): rebase on it and retry
+          for attempt in 1 2 3 4 5; do
+            if git push origin gh-pages; then
+              exit 0
+            fi
+            echo "Push refused: rebase on the new gh-pages and retry ($attempt/5)..."
+            git pull --rebase origin gh-pages
+          done
+          echo "::error title=Push::gh-pages not pushed after 5 attempts"
+          exit 1
   # <<< gh-pages <<<
