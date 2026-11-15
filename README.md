@@ -195,7 +195,7 @@ xstyle --fix --staged     # fix what can be, then git add -u
 - `Unit Tests (CI)`: builds and runs the unit tests, always first (Linux in the `unit-tests` image, Windows in the `mingw64-unit-tests` image under `wine`)
 - `Build (CI)`: only builds the project (Linux in the `ci` image, Windows in the `mingw64-ci` image) and checks the outputs (executable / libraries), without producing packages
 - `Build - Packages (CI/CD)`: builds the packages (RPM/DEB/Arch: Linux in the `ci` image, Windows `mingw64-*` in the `mingw64-ci` image), checks them against the `PACKAGE_*` content, then (gh-pages only) signs and publishes them on the `gh-pages` repository (`fedora/44/x86_64`, `debian/`, `arch/x86_64`, 5 last `-pre` versions kept)
-- `Release - GitHub (CD)`: creates the GitHub release of a tag from its section of the `CHANGELOG.md` (`## vX.Y.Z - date` / `## [vX.Y.Z-pre] - date`), once the packages are built / published
+- `Release - GitHub (CD)`: creates the GitHub release of a tag from its section of the `CHANGELOG.md` (`## vX.Y.Z - date` / `## [vX.Y.Z-pre] - date`, else `## [pre-release]` for a `-pre` tag), once the packages are built / published
 - `Docs - Pages (CD)` (gh-pages only): copies `docs/` on the `gh-pages` branch on every push changing it (`https://<owner>.github.io/<repo>/`)
 - `Sync Packages (CD)` (on the `gh-pages` branch): rebuilds the metadata and signatures of the package repository after a manual push on the branch (not the bot / docs commits)
 
@@ -213,8 +213,10 @@ The pre-release of the packages (`<package_name>-pre`) is triggered by:
 - a tag with a suffix, matching `vx.x.x-<suffix>` (ex: `v1.0.1-pre`, `x` = `major`, `minor`, `fix`)
 - or a commit containing `[build]`
 
+A tag `vx.x.x-<suffix>` also creates a GitHub pre-release, whose notes are its `## [vx.x.x-<suffix>]` section of the `CHANGELOG.md`, or else the `## [pre-release]` one.
+
 ### Release (stable)
-The release of the packages (channel `stable`) and the GitHub release are only triggered by a tag matching exactly `vx.x.x` (ex: `v1.0.0`), whose section must exist in the `CHANGELOG.md`.
+The release of the packages (channel `stable`) and the stable GitHub release are only triggered by a tag matching exactly `vx.x.x` (ex: `v1.0.0`), whose section must exist in the `CHANGELOG.md`.
 
 ### Downstream notification
 A commit containing `[release]` (or a package publication) is the trigger of the commented `notify-downstream` job of `Dispatch (CI/CD)`.

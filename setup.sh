@@ -648,14 +648,14 @@ EOF
         if [[ "$GH_PAGES" == true ]]; then
             cat << EOF
 - \`Build - Packages (CI/CD)\`: builds the packages (RPM/DEB/Arch: Linux in the \`ci\` image, Windows \`mingw64-*\` in the \`mingw64-ci\` image), signs them and publishes them on the \`gh-pages\` repository
-- \`Release - GitHub (CD)\`: creates the GitHub release of a tag from its section of the \`CHANGELOG.md\`, once the packages are published
+- \`Release - GitHub (CD)\`: creates the GitHub release of a tag from its section of the \`CHANGELOG.md\` (\`## [pre-release]\` for a \`-pre\` tag without its own section), once the packages are published
 - \`Docs - Pages (CD)\`: copies \`docs/\` on the \`gh-pages\` branch on every push changing it (${PAGES_URL}/docs/)
 - \`Sync Packages (CD)\` (on \`gh-pages\`): rebuilds the metadata and signatures of the package repository after a manual push on the branch
 EOF
         else
             cat << EOF
 - \`Build - Packages (CI/CD)\`: builds the packages (RPM/DEB/Arch: Linux in the \`ci\` image, Windows \`mingw64-*\` in the \`mingw64-ci\` image), kept as artifacts of the run
-- \`Release - GitHub (CD)\`: creates the GitHub release of a tag from its section of the \`CHANGELOG.md\`, once the packages are built
+- \`Release - GitHub (CD)\`: creates the GitHub release of a tag from its section of the \`CHANGELOG.md\` (\`## [pre-release]\` for a \`-pre\` tag without its own section), once the packages are built
 EOF
         fi
         cat << EOF
@@ -681,11 +681,13 @@ The pre-release of the packages (\`<package_name>-pre\`) is triggered by:
 - a tag with a suffix, matching \`vx.x.x-<suffix>\` (ex: \`v1.0.1-pre\`, \`x\` = \`major\`, \`minor\`, \`fix\`)
 - or a commit containing \`[build]\`
 
+A tag \`vx.x.x-<suffix>\` also creates a GitHub pre-release, whose notes are its \`## [vx.x.x-<suffix>]\` section of the \`CHANGELOG.md\`, or else the \`## [pre-release]\` one.
+
 EOF
         [[ "$GH_PAGES" == true ]] && printf '> [!NOTE]\n> Only the 5 last versions of each `-pre` package are kept in the package repository, every release is kept.\n\n'
         cat << EOF
 ### Release (stable)
-The release of the packages (channel \`stable\`) and the GitHub release are only triggered by a tag matching exactly \`vx.x.x\` (ex: \`v1.0.0\`), whose section must exist in the \`CHANGELOG.md\`.
+The release of the packages (channel \`stable\`) and the stable GitHub release are only triggered by a tag matching exactly \`vx.x.x\` (ex: \`v1.0.0\`), whose section must exist in the \`CHANGELOG.md\`.
 
 ### Downstream notification
 \`Dispatch (CI/CD)\` has a commented \`notify-downstream\` job (\`repository_dispatch\` to another repository, like libutils -> docker-image), triggered after a package publication or by a commit containing \`[release]\`.
