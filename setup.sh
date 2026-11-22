@@ -332,7 +332,8 @@ sed -i "s/^PROJECT_NAME\( *\)= .*/PROJECT_NAME\1= \"${PROJECT_NAME}\"/" "$TMP_DI
 REPO_FILES=("$TMP_DIR/CMakeLists.txt" "$GH_PAGES_DIR/$PROJECT_NAME.repo")
 if [[ -f "$TMP_DIR/setup.sh" ]]; then
     REPO_FILES+=("$TMP_DIR/setup.sh")
-    sed -i "s/^PACKAGE=\"[^\"]*\"/PACKAGE=\"${PACKAGE_BASE}\"/" "$TMP_DIR/setup.sh" # global package: lib<name> for a library
+    # Only the literal value: PACKAGE="${PREFIX}${PACKAGE}${CHANNEL}" (the --pre / --windows choice) is kept
+    sed -i "s/^PACKAGE=\"[^\"\$]*\"/PACKAGE=\"${PACKAGE_BASE}\"/" "$TMP_DIR/setup.sh" # global package: lib<name> for a library
 fi
 sed -i "s|TsukiNi22/${PROJECT_NAME}\b|${GITHUB_REPO}|g; s|tsukini22.github.io/${PROJECT_NAME}\b|${PAGES_URL#https://}|g" "${REPO_FILES[@]}"
 
