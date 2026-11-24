@@ -185,6 +185,7 @@ fi
 # Remove file & content that are only here for the template repository
 rm -f "$TMP_DIR/$SCRIPT_NAME" "$TMP_DIR/scripts.zip" # Remove this script
 rm -f "$TMP_DIR/.github/workflows/setup.yml" # Check of the script execution
+rm -rf "$TMP_DIR/readme" # Details of the template README (setup.sh, packages, workflows)
 sed -i "/# Don't run on template repository/{N;d;}" "$TMP_DIR/.github/workflows/dispatch.yml" "$TMP_DIR/.github/workflows/docs.yml" # Remove start condition
 
 # Project kind: default of the CMake options and content checked by the workflows
