@@ -53,5 +53,5 @@ The pre-release notes are its `## [vX.Y.Z-<suffix>]` section of the `CHANGELOG.m
 Its `## vX.Y.Z - date` section must exist in the `CHANGELOG.md`.
 
 ## Downstream notification
-A commit with `[release]`, or a package publication, triggers the `notify-downstream` job of `dispatch.yml`.
+A commit with `[release]`, or a package publication, triggers the `notify-downstream` job of `dispatch.yml` once the unit tests passed.
 The job is commented: an example of `repository_dispatch` to another repository, like libutils -> docker-image.

@@ -734,7 +734,7 @@ The release of the packages (channel \`stable\`) and the stable GitHub release a
 > The version of a tag (\`vx.x.x\`, suffix ignored) must be the one of \`project(... VERSION x.x.x)\` in the \`CMakeLists.txt\`: the packages are refused otherwise.
 
 ### Downstream notification
-\`Dispatch (CI/CD)\` has a commented \`notify-downstream\` job (\`repository_dispatch\` to another repository, like libutils -> docker-image), triggered after a package publication or by a commit containing \`[release]\`.
+\`Dispatch (CI/CD)\` has a commented \`notify-downstream\` job (\`repository_dispatch\` to another repository, like libutils -> docker-image), triggered after a package publication or by a commit containing \`[release]\`, once the unit tests passed.
 EOF
     } > "$TMP_DIR/README.md"
 }
