@@ -683,7 +683,7 @@ xstyle --fix --staged                 # fix what can be, then git add -u
 ### Workflows
 - \`Dispatch (CI/CD)\`: runs on every push (branch \`main\` or tag \`v*\`, not for \`*.md\` / \`*.txt\` / \`docs/\` only changes) and decides what to trigger from the ref / commit message
 - \`Lint (CI)\`: runs on every push (not with \`[ignore]\`): \`shellcheck\` on the shell scripts, \`actionlint\` on the workflows, \`xstyle\` on the project (refuses a \`major\` issue)
-- \`Unit Tests (CI)\`: builds and runs the unit tests, always first (Linux in the \`unit-tests\` image: Debug then AddressSanitizer, Windows in the \`mingw64-unit-tests\` image under \`wine\`)
+- \`Unit Tests (CI)\`: builds and runs the unit tests, always first (Linux in the \`unit-tests\` image: Debug then AddressSanitizer, Windows in the \`mingw64-unit-tests\` image under \`wine\`, a test that hangs on exit retried once)
 - \`Build (CI)\`: only builds the project (Linux in the \`ci\` image, Windows in the \`mingw64-ci\` image) and checks the outputs, without producing packages
 EOF
         if [[ "$GH_PAGES" == true ]]; then

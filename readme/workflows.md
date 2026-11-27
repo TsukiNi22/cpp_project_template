@@ -15,7 +15,7 @@
 | -------- | ------- | ---- |
 | `Dispatch (CI/CD)` | each push to `main`, each `v*` tag | picks the jobs from the ref and the commit message |
 | `Lint (CI)` | each push to `main` | `shellcheck`, `actionlint`, `xstyle`; a missing tool is a warning |
-| `Unit Tests (CI)` | Dispatch, always first | Linux: Debug then AddressSanitizer; Windows: under `wine` |
+| `Unit Tests (CI)` | Dispatch, always first | Linux: Debug then AddressSanitizer; Windows: under `wine` (a test that hangs on exit retried once) |
 | `Build (CI)` | Dispatch, without package build | builds the project and checks its outputs |
 | `Build - Packages (CI/CD)` | Dispatch, a pre-release or a release | builds, checks and (with `gh-pages`) signs and publishes the packages |
 | `Release - GitHub (CD)` | Dispatch, a tag, after the packages | GitHub release from the `CHANGELOG.md`, with the packages attached |
